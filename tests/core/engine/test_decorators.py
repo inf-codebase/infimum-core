@@ -134,12 +134,12 @@ class TestVlmPersistAfter:
     """Test cases for vlm_persist_after decorator."""
 
     @pytest.mark.asyncio
-    @patch('core.engine.decorators.task')
-    async def test_vlm_persist_after_async(self, mock_task):
+    async def test_vlm_persist_after_async(self):
         """Test vlm_persist_after with async function."""
         mock_task_instance = Mock()
-        mock_task_instance.apply_async.return_value.id = "task_123"
-        mock_task.return_value = mock_task_instance
+        mock_apply_result = Mock()
+        mock_apply_result.id = "task_123"
+        mock_task_instance.apply_async.return_value = mock_apply_result
         
         @vlm_persist_after(mock_task_instance, queue="test")
         async def test_func():
@@ -153,12 +153,12 @@ class TestVlmPersistAfter:
         assert result["transcript"] == "test transcript"
         mock_task_instance.apply_async.assert_called_once()
 
-    @patch('core.engine.decorators.task')
-    def test_vlm_persist_after_sync(self, mock_task):
+    def test_vlm_persist_after_sync(self):
         """Test vlm_persist_after with sync function."""
         mock_task_instance = Mock()
-        mock_task_instance.apply_async.return_value.id = "task_123"
-        mock_task.return_value = mock_task_instance
+        mock_apply_result = Mock()
+        mock_apply_result.id = "task_123"
+        mock_task_instance.apply_async.return_value = mock_apply_result
         
         @vlm_persist_after(mock_task_instance, queue="test")
         def test_func():
@@ -173,11 +173,9 @@ class TestVlmPersistAfter:
         mock_task_instance.apply_async.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('core.engine.decorators.task')
-    async def test_vlm_persist_after_missing_transcript(self, mock_task):
+    async def test_vlm_persist_after_missing_transcript(self):
         """Test vlm_persist_after skips when transcript is missing."""
         mock_task_instance = Mock()
-        mock_task.return_value = mock_task_instance
         
         @vlm_persist_after(mock_task_instance, queue="test")
         async def test_func():

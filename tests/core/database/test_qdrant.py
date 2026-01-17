@@ -1,6 +1,6 @@
 """Unit tests for core.database.qdrant module."""
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from core.database.qdrant import QdrantManager, AsyncQdrantManager
 
 
@@ -145,8 +145,8 @@ class TestAsyncQdrantManager:
     @pytest.mark.asyncio
     async def test_ensure_collection_async(self):
         """Test async ensure_collection."""
-        mock_client = Mock()
-        mock_client.get_collection = Mock(side_effect=Exception("Not found"))
+        mock_client = AsyncMock()
+        mock_client.get_collection = AsyncMock(side_effect=Exception("Not found"))
         self.manager.client = mock_client
         
         await self.manager.ensure_collection("test_collection", has_vector=True)
@@ -156,9 +156,9 @@ class TestAsyncQdrantManager:
     @pytest.mark.asyncio
     async def test_insert_points_async(self):
         """Test async insert_points."""
-        mock_client = Mock()
+        mock_client = AsyncMock()
         self.manager.client = mock_client
-        self.manager.ensure_collection = Mock()
+        self.manager.ensure_collection = AsyncMock()
         
         points = [{"id": "1", "vector": [0.1, 0.2], "payload": {}}]
         
@@ -169,10 +169,10 @@ class TestAsyncQdrantManager:
     @pytest.mark.asyncio
     async def test_query_points_async(self):
         """Test async query_points."""
-        mock_client = Mock()
+        mock_client = AsyncMock()
         mock_result = Mock()
         mock_result.dict.return_value = {"id": "1"}
-        mock_client.search = Mock(return_value=[mock_result])
+        mock_client.search = AsyncMock(return_value=[mock_result])
         self.manager.client = mock_client
         
         results = await self.manager.query_points("test_collection", [0.1, 0.2])
@@ -182,7 +182,7 @@ class TestAsyncQdrantManager:
     @pytest.mark.asyncio
     async def test_close_async(self):
         """Test async close."""
-        mock_client = Mock()
+        mock_client = AsyncMock()
         self.manager.client = mock_client
         
         await self.manager.close()

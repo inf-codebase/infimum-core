@@ -71,7 +71,8 @@ class TestSQLManager:
         mock_engine = Mock()
         mock_create_engine.return_value = mock_engine
         mock_session = Mock()
-        mock_sessionmaker.return_value = mock_session
+        # sessionmaker returns a class, so we need to make it return a callable that returns the mock session
+        mock_sessionmaker.return_value = lambda: mock_session
         
         self.manager.connect()
         
@@ -88,7 +89,8 @@ class TestSQLManager:
         mock_engine = Mock()
         mock_create_engine.return_value = mock_engine
         mock_session = Mock()
-        mock_sessionmaker.return_value = mock_session
+        # sessionmaker returns a class, so we need to make it return a callable that returns the mock session
+        mock_sessionmaker.return_value = lambda: mock_session
         
         self.manager.connect()
         

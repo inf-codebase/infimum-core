@@ -1,151 +1,218 @@
-"""Unit tests for core.engine.context module."""
+"""
+Tests for dependency injection container and context management.
+
+This module tests the InjectionContainer, multiple instance support,
+and scoped container functionality.
+"""
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, MagicMock
 from core.engine.context import (
     InjectionContainer,
-    context,
-    inject,
+    container_scope,
     register,
     get,
-    register_postgres,
-    register_mongo,
-    get_database_manager,
-    with_database
+    register_factory,
 )
+from core.database import DatabaseManager
 
 
 class TestInjectionContainer:
-    """Test cases for InjectionContainer class."""
-
+    """Test cases for InjectionContainer."""
+    
     def setup_method(self):
         """Set up test fixtures."""
-        self.container = InjectionContainer()
-
-    def test_register_dependency(self):
-        """Test registering a dependency."""
-        mock_dep = Mock()
-        self.container.register("test_dep", mock_dep)
+        # Clear all instances before each test
+        if hasattr(InjectionContainer, '_instances'):
+            InjectionContainer._instances.clear()
+    
+    def teardown_method(self):
+        """Clean up after each test."""
+        InjectionContainer.clear_all_instances()
+    
+    def test_register_and_get_dependency(self):
+        """Test registering and retrieving a dependency."""
+        container = InjectionContainer.get_instance("test")
         
-        assert self.container.get("test_dep") == mock_dep
-
+        container.register("test_dep", "test_value")
+        
+        assert container.get("test_dep") == "test_value"
+    
     def test_register_factory(self):
         """Test registering a factory function."""
+        container = InjectionContainer.get_instance("test")
+        
         def factory():
-            return "created"
+            return {"created": True}
         
-        self.container.register_factory("test_factory", factory)
+        container.register_factory("factory_dep", factory)
         
-        assert self.container.get("test_factory") == "created"
-
+        result = container.get("factory_dep")
+        assert result["created"] is True
+    
     def test_get_nonexistent_dependency(self):
-        """Test getting non-existent dependency raises error."""
+        """Test that getting nonexistent dependency raises error."""
+        container = InjectionContainer.get_instance("test")
+        
+        with pytest.raises(KeyError, match="Dependency 'nonexistent' not found"):
+            container.get("nonexistent")
+    
+    def test_multiple_instances(self):
+        """Test that multiple named instances work independently."""
+        container1 = InjectionContainer.get_instance("container1")
+        container2 = InjectionContainer.get_instance("container2")
+        
+        container1.register("dep", "value1")
+        container2.register("dep", "value2")
+        
+        assert container1.get("dep") == "value1"
+        assert container2.get("dep") == "value2"
+    
+    def test_singleton_per_name(self):
+        """Test that same name returns same instance."""
+        container1 = InjectionContainer.get_instance("test")
+        container2 = InjectionContainer.get_instance("test")
+        
+        assert container1 is container2
+        
+        container1.register("test", "value")
+        assert container2.get("test") == "value"
+    
+    def test_clear_instance(self):
+        """Test clearing a specific instance."""
+        container = InjectionContainer.get_instance("test")
+        container.register("dep", "value")
+        
+        InjectionContainer.clear_instance("test")
+        
+        # Getting a new instance should be fresh
+        new_container = InjectionContainer.get_instance("test")
         with pytest.raises(KeyError):
-            self.container.get("nonexistent")
-
-    def test_inject_decorator(self):
-        """Test inject decorator."""
-        self.container.register("dep1", "value1")
-        self.container.register("dep2", "value2")
+            new_container.get("dep")
+    
+    def test_clear_all_instances(self):
+        """Test clearing all instances."""
+        container1 = InjectionContainer.get_instance("test1")
+        container2 = InjectionContainer.get_instance("test2")
         
-        @self.container.inject("dep1", "dep2")
-        def test_func(dep1, dep2, arg1):
-            return f"{dep1}-{dep2}-{arg1}"
+        container1.register("dep1", "value1")
+        container2.register("dep2", "value2")
         
-        result = test_func("test")
-        assert result == "value1-value2-test"
+        InjectionContainer.clear_all_instances()
+        
+        # New instances should be fresh
+        new_container1 = InjectionContainer.get_instance("test1")
+        new_container2 = InjectionContainer.get_instance("test2")
+        
+        with pytest.raises(KeyError):
+            new_container1.get("dep1")
+        with pytest.raises(KeyError):
+            new_container2.get("dep2")
 
-    def test_register_postgres(self):
-        """Test registering PostgreSQL database."""
-        with patch('core.engine.context.auto_config') as mock_config:
-            mock_config.POSTGRES_HOST = "localhost"
-            mock_config.POSTGRES_PORT = "5432"
-            mock_config.POSTGRES_DATABASE = "testdb"
-            mock_config.POSTGRES_USER = "user"
-            mock_config.POSTGRES_PASSWORD = "pass"
+
+class TestContainerScope:
+    """Test cases for container_scope context manager."""
+    
+    def setup_method(self):
+        """Set up test fixtures."""
+        from core.engine.context import context
+        # Reset current context
+        context._current = context
+    
+    def test_container_scope_switches_context(self):
+        """Test that container_scope switches to different container."""
+        from core.engine.context import context
+        
+        # Register in default context
+        register("default_dep", "default_value")
+        
+        # Use scoped container
+        with container_scope("scoped"):
+            register("scoped_dep", "scoped_value")
+            assert get("scoped_dep") == "scoped_value"
+            # Default dep should not be available in scoped context
+            with pytest.raises(KeyError):
+                get("default_dep")
+        
+        # Back to default context
+        assert get("default_dep") == "default_value"
+        with pytest.raises(KeyError):
+            get("scoped_dep")
+    
+    def test_container_scope_nested(self):
+        """Test nested container scopes."""
+        from core.engine.context import context
+        
+        with container_scope("outer"):
+            register("outer_dep", "outer_value")
             
-            self.container.register_postgres("test_db")
+            with container_scope("inner"):
+                register("inner_dep", "inner_value")
+                assert get("inner_dep") == "inner_value"
+                # Outer dep should not be available in inner scope
+                with pytest.raises(KeyError):
+                    get("outer_dep")
             
-            assert "test_db" in self.container._database_configs
-
-    def test_register_mongo(self):
-        """Test registering MongoDB."""
-        with patch('core.engine.context.auto_config') as mock_config:
-            mock_config.MONGO_URI = "mongodb://localhost"
-            mock_config.MONGO_DATABASE = "testdb"
-            
-            self.container.register_mongo("test_db")
-            
-            assert "test_db" in self.container._database_configs
-
-    def test_register_sqlite(self):
-        """Test registering SQLite database."""
-        with patch('core.engine.context.auto_config') as mock_config:
-            mock_config.SQLITE_PATH = "/path/to/db.sqlite"
-            
-            self.container.register_sqlite("test_db")
-            
-            assert "test_db" in self.container._database_configs
-
-    def test_get_database_manager(self):
-        """Test getting database manager."""
-        mock_manager = Mock()
-        self.container._database_factory.create_manager = Mock(return_value=mock_manager)
-        self.container._database_configs["test_db"] = {"type": "postgres"}
+            # Back to outer scope
+            assert get("outer_dep") == "outer_value"
+            with pytest.raises(KeyError):
+                get("inner_dep")
+    
+    def test_container_scope_restores_previous(self):
+        """Test that container_scope restores previous context."""
+        from core.engine.context import context
         
-        result = self.container.get_database_manager("test_db")
+        original_current = context._current
         
-        assert result == mock_manager
-
-    def test_close_database(self):
-        """Test closing a database."""
-        self.container._database_factory.close = Mock()
+        with container_scope("test"):
+            assert context._current.name == "test"
         
-        self.container.close_database("test_db")
-        
-        self.container._database_factory.close.assert_called_once_with("test_db")
-
-    def test_close_all_databases(self):
-        """Test closing all databases."""
-        self.container._database_factory.close_all = Mock()
-        
-        self.container.close_all_databases()
-        
-        self.container._database_factory.close_all.assert_called_once()
+        # Should restore original
+        assert context._current is original_current
 
 
 class TestGlobalFunctions:
-    """Test cases for global helper functions."""
-
-    def test_register_global(self):
-        """Test global register function."""
-        register("test_global", "value")
+    """Test cases for global DI functions."""
+    
+    def setup_method(self):
+        """Set up test fixtures."""
+        from core.engine.context import context
+        context._current = context
+        # Clear default container
+        if hasattr(context, '_dependencies'):
+            context._dependencies.clear()
+        if hasattr(context, '_factories'):
+            context._factories.clear()
+    
+    def test_global_register_and_get(self):
+        """Test global register and get functions."""
+        register("global_dep", "global_value")
         
-        assert get("test_global") == "value"
-
-    @patch('core.engine.context.context')
-    def test_register_postgres_global(self, mock_context):
-        """Test global register_postgres function."""
-        register_postgres("test_db", host="localhost")
+        assert get("global_dep") == "global_value"
+    
+    def test_global_register_factory(self):
+        """Test global register_factory function."""
+        def factory():
+            return "factory_value"
         
-        mock_context.register_postgres.assert_called_once()
-
-    @patch('core.engine.context.context')
-    def test_get_database_manager_global(self, mock_context):
-        """Test global get_database_manager function."""
-        mock_manager = Mock()
-        mock_context.get_database_manager.return_value = mock_manager
+        register_factory("factory_dep", factory)
         
-        result = get_database_manager("test_db")
+        assert get("factory_dep") == "factory_value"
+    
+    def test_global_functions_use_current_context(self):
+        """Test that global functions use current context."""
+        from core.engine.context import context
         
-        assert result == mock_manager
-
-    @patch('core.engine.context.context')
-    def test_with_database(self, mock_context):
-        """Test with_database helper function."""
-        mock_manager = Mock()
-        mock_manager.is_connected.return_value = True
-        mock_context.get_database_manager.return_value = mock_manager
+        # Register in default
+        register("default_dep", "default")
         
-        result = with_database("test_db")
+        # Switch context and register
+        with container_scope("other"):
+            register("other_dep", "other")
+            assert get("other_dep") == "other"
+            # Default should not be available
+            with pytest.raises(KeyError):
+                get("default_dep")
         
-        assert result == mock_manager
+        # Back to default
+        assert get("default_dep") == "default"

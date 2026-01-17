@@ -89,141 +89,30 @@ def _pick(d: Dict[str, Any], *keys, default=None):
 
 def vlm_persist_after(task, queue: str = "vlm", inject_task_id: bool = True):
     """
-    Decorator chuyên cho API predict ảnh → lưu DB (VLMAnalysis).
-    Kỳ vọng response của route chứa các field phổ biến:
-      - transcript (bắt buộc)
-      - prompt hoặc prompt_used
-      - video_metadata (dict)
-      - video_id / frame_index / frame_timestamp_seconds (tuỳ chọn)
-    Nếu route có tham số 'payload' và có 'id' → dùng làm video_segment_id.
-    Nếu không, cố gắng đọc từ result['video_segment_id'] (nếu có).
+    DEPRECATED: This decorator has been moved to core.ai.vlm.decorators.
+    
+    This function is kept for backward compatibility but will be removed
+    in a future release. Please update your imports:
+    
+    OLD: from core.engine.decorators import vlm_persist_after
+    NEW: from core.ai.vlm.decorators import vlm_persist_after
+    
+    Args:
+        task: Celery task instance for async processing
+        queue: Queue name for task (default: "vlm")
+        inject_task_id: Whether to inject task ID into result (default: True)
+    
+    Returns:
+        Decorator function
     """
-    def _decorator(fn):
-        if iscoroutinefunction(fn):
-            @wraps(fn)
-            async def _async_wrapper(*args, **kwargs):
-                result = await fn(*args, **kwargs)
-                try:
-                    result_d = _safe_to_dict(result)
-
-                    # Lấy payload nếu có (để đọc .id)
-                    bound = signature(fn).bind_partial(*args, **kwargs)
-                    payload = bound.arguments.get("payload", None)
-                    payload_d = _safe_to_dict(payload)
-
-                    # Map fields theo quy ước
-                    transcript = _pick(result_d, "transcript")
-                    prompt     = _pick(result_d, "prompt", "prompt_used", default=None)
-                    video_md   = _pick(result_d, "video_metadata", default={}) or {}
-                    video_id   = _pick(result_d, "video_id", default=None)
-                    frame_idx  = _pick(result_d, "frame_index", default=0)
-                    frame_ts   = _pick(result_d, "frame_timestamp_seconds", default=None)
-
-                    video_segment_id = (
-                        _pick(payload_d, "id", default=None) or
-                        _pick(result_d, "video_segment_id", default=None)
-                    )
-
-                    if not transcript:
-                        logger.warning("[vlm_persist_after] Missing transcript in route result; skip enqueue.")
-                        return result
-                    if not video_segment_id:
-                        logger.warning("[vlm_persist_after] Missing video_segment_id (payload.id/result.video_segment_id); skip enqueue.")
-                        return result
-
-                    inference_payload = {
-                        "result": {
-                            "transcript": transcript,
-                            "video_metadata": video_md,
-                            "details": None,
-                        },
-                        "meta": {
-                            "image_path": None,
-                            "prompt": prompt,
-                            "video_segment_id": video_segment_id,
-                            "external_video_id": video_id,
-                            "frame_index": frame_idx or 0,
-                            "frame_timestamp_seconds": frame_ts,
-                        }
-                    }
-
-                    async_res = task.apply_async(kwargs={"inference_payload": inference_payload}, queue=queue)
-
-                    # Nhét task_id vào result.video_metadata nếu có
-                    if inject_task_id:
-                        try:
-                            # result có thể là model; cố gắng chèn vào dict video_metadata
-                            if isinstance(video_md, dict):
-                                video_md["async_persist_task_id"] = async_res.id
-                                # nếu result là dict, set lại cho client thấy
-                                if isinstance(result, dict):
-                                    result.setdefault("video_metadata", video_md)
-                                else:
-                                    # nếu là Pydantic model có field, thử gán
-                                    if hasattr(result, "video_metadata"):
-                                        setattr(result, "video_metadata", video_md)
-                        except Exception as e:
-                            logger.warning(f"[vlm_persist_after] Cannot inject task id: {e}")
-
-                except Exception as e:
-                    # Không để việc enqueue fail làm hỏng response
-                    logger.error(f"[vlm_persist_after] Enqueue error: {e}")
-
-                return result
-            return _async_wrapper
-
-        else:
-            @wraps(fn)
-            def _sync_wrapper(*args, **kwargs):
-                result = fn(*args, **kwargs)
-                try:
-                    result_d = _safe_to_dict(result)
-                    bound = signature(fn).bind_partial(*args, **kwargs)
-                    payload = bound.arguments.get("payload", None)
-                    payload_d = _safe_to_dict(payload)
-
-                    transcript = _pick(result_d, "transcript")
-                    prompt     = _pick(result_d, "prompt", "prompt_used", default=None)
-                    video_md   = _pick(result_d, "video_metadata", default={}) or {}
-                    video_id   = _pick(result_d, "video_id", default=None)
-                    frame_idx  = _pick(result_d, "frame_index", default=0)
-                    frame_ts   = _pick(result_d, "frame_timestamp_seconds", default=None)
-
-                    video_segment_id = (
-                        _pick(payload_d, "id", default=None) or
-                        _pick(result_d, "video_segment_id", default=None)
-                    )
-
-                    if not transcript or not video_segment_id:
-                        return result
-
-                    inference_payload = {
-                        "result": {
-                            "transcript": transcript,
-                            "video_metadata": video_md,
-                            "details": None,
-                        },
-                        "meta": {
-                            "image_path": None,
-                            "prompt": prompt,
-                            "video_segment_id": video_segment_id,
-                            "external_video_id": video_id,
-                            "frame_index": frame_idx or 0,
-                            "frame_timestamp_seconds": frame_ts,
-                        }
-                    }
-                    async_res = task.apply_async(kwargs={"inference_payload": inference_payload}, queue=queue)
-
-                    if inject_task_id and isinstance(video_md, dict):
-                        video_md["async_persist_task_id"] = async_res.id
-                        if isinstance(result, dict):
-                            result.setdefault("video_metadata", video_md)
-                        else:
-                            if hasattr(result, "video_metadata"):
-                                setattr(result, "video_metadata", video_md)
-                except Exception as e:
-                    logger.error(f"[vlm_persist_after] Enqueue error: {e}")
-
-                return result
-            return _sync_wrapper
-    return _decorator
+    import warnings
+    from core.ai.vlm.decorators import vlm_persist_after as _new_vlm_persist_after
+    
+    warnings.warn(
+        "vlm_persist_after has been moved to core.ai.vlm.decorators. "
+        "Please update your imports. This compatibility shim will be removed in a future release.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    return _new_vlm_persist_after(task, queue=queue, inject_task_id=inject_task_id)

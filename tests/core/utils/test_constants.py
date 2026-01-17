@@ -81,15 +81,15 @@ class TestCrawlingType:
 
     def test_crawling_type_pdf(self):
         """Test CrawlingType.PDF."""
-        assert CrawlingType.PDF == 1
+        assert CrawlingType.PDF.value == 1
 
     def test_crawling_type_web(self):
         """Test CrawlingType.WEB."""
-        assert CrawlingType.WEB == 2
+        assert CrawlingType.WEB.value == 2
 
     def test_crawling_type_text(self):
         """Test CrawlingType.TEXT."""
-        assert CrawlingType.TEXT == 3
+        assert CrawlingType.TEXT.value == 3
 
 
 class TestPrompt:

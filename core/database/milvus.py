@@ -32,16 +32,49 @@ from pymilvus import (
     DataType,
 )
 
-from core.database.postgres import DatabaseManager
+from core.database.base import DatabaseManager
+from core.database.interfaces import VectorDatabaseManager
+from core.database.config import DatabaseConnectionConfig, VectorCollectionConfig, VectorIndexConfig
+from core.exceptions import DatabaseConnectionError, DatabaseQueryError
 from loguru import logger
+import warnings
 
 
-class MilvusManager(DatabaseManager):
-    def __init__(self, milvus_host="localhost", milvus_port=19530):
-        """Initialize MilvusManager with connection parameters."""
-        self.milvus_host = milvus_host
-        self.milvus_port = milvus_port
+class MilvusManager(VectorDatabaseManager):
+    def __init__(self, milvus_host="localhost", milvus_port=19530, **kwargs):
+        """Initialize MilvusManager with connection parameters.
+        
+        Args:
+            milvus_host: Milvus host address (or DatabaseConnectionConfig for new API)
+            milvus_port: Milvus port number
+            **kwargs: Additional arguments
+        """
+        # Support both old API (host, port) and new API (DatabaseConnectionConfig)
+        if isinstance(milvus_host, DatabaseConnectionConfig):
+            config = milvus_host
+            self.milvus_host = config.host or "localhost"
+            self.milvus_port = config.port or 19530
+        else:
+            self.milvus_host = milvus_host
+            self.milvus_port = milvus_port
         self.connection = None
+    
+    @classmethod
+    def from_config(cls, config: DatabaseConnectionConfig, **kwargs):
+        """Create manager from configuration object (new API).
+        
+        Args:
+            config: DatabaseConnectionConfig instance
+            **kwargs: Additional arguments
+        
+        Returns:
+            MilvusManager instance
+        """
+        return cls(
+            milvus_host=config.host or "localhost",
+            milvus_port=config.port or 19530,
+            **kwargs
+        )
 
     def connect(self):
         """Establish connection to Milvus."""
@@ -69,7 +102,11 @@ class MilvusManager(DatabaseManager):
         return self.connection is not None
 
     def ensure_collection(
-        self, collection_name: str, has_vector: bool, vector_size: int = 1536
+        self, 
+        collection_name: str, 
+        has_vector: bool, 
+        vector_size: int = 1536,
+        index_config: Optional[VectorIndexConfig] = None
     ):
         """
         Ensure the collection exists in Milvus and has proper index.
@@ -96,30 +133,39 @@ class MilvusManager(DatabaseManager):
 
             # Create index if collection has vector field
             if has_vector:
-                self.ensure_index(collection)
+                self.ensure_index(collection, index_config)
         else:
             collection = Collection(name=collection_name)
             logger.info(f"Collection {collection_name} already exists")
 
             # Ensure index exists for existing collection with vector field
             if has_vector and not collection.has_index():
-                self.ensure_index(collection)
+                self.ensure_index(collection, index_config)
 
         return collection
 
-    def ensure_index(self, collection: Collection):
+    def ensure_index(self, collection: Collection, index_config: Optional[VectorIndexConfig] = None):
         """
         Ensure the collection has a proper vector index.
 
         Args:
             collection: Milvus Collection object
+            index_config: Optional index configuration (uses defaults if None)
         """
         try:
-            index_params = {
-                "metric_type": "L2",
-                "index_type": "IVF_FLAT",
-                "params": {"nlist": 1024}
-            }
+            if index_config:
+                index_params = {
+                    "metric_type": index_config.metric_type,
+                    "index_type": index_config.index_type,
+                    "params": index_config.params
+                }
+            else:
+                # Default index configuration
+                index_params = {
+                    "metric_type": "L2",
+                    "index_type": "IVF_FLAT",
+                    "params": {"nlist": 1024}
+                }
 
             collection.create_index(
                 field_name="vector",
@@ -153,7 +199,7 @@ class MilvusManager(DatabaseManager):
             logger.info(f"Inserted {len(points)} points into {collection_name}")
         except Exception as e:
             logger.error(f"Failed to insert points: {e}", exc_info=True)
-            raise
+            raise DatabaseQueryError(f"Failed to insert points into {collection_name}: {e}") from e
 
     def query_points(
         self,
@@ -210,7 +256,7 @@ class MilvusManager(DatabaseManager):
             logger.info(f"Deleted {len(point_ids)} points from {collection_name}")
         except Exception as e:
             logger.error(f"Failed to delete points: {e}", exc_info=True)
-            raise
+            raise DatabaseQueryError(f"Failed to delete points from {collection_name}: {e}") from e
 
     def update_point_payload(self, collection_name: str, point_id: str, payload: dict):
         """Update the payload of a specific point."""
@@ -222,10 +268,46 @@ class MilvusManager(DatabaseManager):
             logger.error(f"Failed to update payload: {e}", exc_info=True)
             raise
 
+    def insert_or_update(self, model, auto_commit=True, update_if_true_conditions=None):
+        """
+        Insert or update a model in Milvus.
+        Note: This is a stub implementation for DatabaseManager interface.
+        Milvus uses a different data model (vectors/points) than SQL databases.
+        """
+        raise NotImplementedError(
+            "MilvusManager does not support insert_or_update. "
+            "Use insert_points() or update_point_payload() instead."
+        )
+
+    def query_or_create_new(self, model_class, query_conditions=None):
+        """
+        Query or create a new model instance.
+        Note: This is a stub implementation for DatabaseManager interface.
+        Milvus uses a different data model (vectors/points) than SQL databases.
+        """
+        raise NotImplementedError(
+            "MilvusManager does not support query_or_create_new. "
+            "Use query_points() or scroll_points() instead."
+        )
+
 
 import asyncio
+from typing import List, Dict, Any, Optional
 
 class AsyncMilvusManager(MilvusManager):
+    """Asynchronous version of MilvusManager.
+    
+    This class provides async versions of all Milvus operations.
+    It inherits from MilvusManager but overrides methods to be async.
+    
+    Example:
+        ```python
+        async_manager = AsyncMilvusManager(milvus_host="localhost", milvus_port=19530)
+        await async_manager.connect()
+        await async_manager.insert_points("my_collection", points_data)
+        results = await async_manager.query_points("my_collection", query_vector)
+        ```
+    """
     async def connect(self):
         """Establish an asynchronous connection to Milvus."""
         if not self.connection:
@@ -424,3 +506,25 @@ class AsyncMilvusManager(MilvusManager):
         except Exception as e:
             logger.error(f"Failed to update payload: {e}", exc_info=True)
             raise
+
+    async def insert_or_update(self, model, auto_commit=True, update_if_true_conditions=None):
+        """
+        Insert or update a model in Milvus.
+        Note: This is a stub implementation for DatabaseManager interface.
+        Milvus uses a different data model (vectors/points) than SQL databases.
+        """
+        raise NotImplementedError(
+            "AsyncMilvusManager does not support insert_or_update. "
+            "Use insert_points() or update_point_payload() instead."
+        )
+
+    async def query_or_create_new(self, model_class, query_conditions=None):
+        """
+        Query or create a new model instance.
+        Note: This is a stub implementation for DatabaseManager interface.
+        Milvus uses a different data model (vectors/points) than SQL databases.
+        """
+        raise NotImplementedError(
+            "AsyncMilvusManager does not support query_or_create_new. "
+            "Use query_points() or scroll_points() instead."
+        )

@@ -21,46 +21,8 @@ from typing import List
 from urllib.parse import quote
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.engine import make_url
-
-
-class DatabaseManager:
-    """Base class for database managers"""
-    @abstractmethod
-    def connect(self):
-        pass
-
-    @abstractmethod
-    def close(self):
-        pass
-
-    @abstractmethod
-    def insert_or_update(self, model, auto_commit=True, update_if_true_conditions=None):
-        """
-        Insert a new record or update an existing one based on conditions.
-
-        Args:
-            model: The model instance to insert or update
-            auto_commit: Whether to commit the transaction immediately
-            update_if_true_conditions: Dictionary of field-value pairs to use for finding existing records
-
-        Returns:
-            The inserted or updated model instance
-        """
-        pass
-
-    @abstractmethod
-    def query_or_create_new(self, model_class, query_conditions=None):
-        """
-        Query for an existing record or create a new instance if not found.
-
-        Args:
-            model_class: The model class to query or instantiate
-            query_conditions: Dictionary of field-value pairs to use for finding existing records
-
-        Returns:
-            An existing record instance or a new (unsaved) instance
-        """
-        pass
+from core.database.base import DatabaseManager
+from core.database.interfaces import RelationalDatabaseManager, DocumentDatabaseManager
 
 
 class MongoManagerBase:
@@ -262,7 +224,7 @@ class SQLManager(DatabaseManager):
             logger.error(f"Error creating tables: {str(e)}")
             return False
 
-class PostgresDatabaseManagerImpl(SQLManager):
+class PostgresDatabaseManagerImpl(SQLManager, RelationalDatabaseManager):
     def __init__(self, engine_info=None, **kwargs):
         super().__init__(engine_info, **kwargs)
 
@@ -365,12 +327,16 @@ class PostgresDatabaseManagerImpl(SQLManager):
             logger.error(f"Error in query: {str(e)}")
             raise e
 
-class SyncMongoManager(MongoManagerBase, DatabaseManager):
+class SyncMongoManager(MongoManagerBase, DocumentDatabaseManager):
     """Synchronous MongoDB Manager"""
 
     def __init__(self, connection_string: str, database: str, **kwargs):
         super().__init__(connection_string, database)
         self.connect()
+    
+    def is_connected(self) -> bool:
+        """Check if connection is established."""
+        return self.client is not None and hasattr(self, 'db')
 
     def get_collection(self, collection: Union[str, Type[Document], Document]) -> Collection:
         """Get MongoDB collection
@@ -519,12 +485,16 @@ class SyncMongoManager(MongoManagerBase, DatabaseManager):
             # Create new instance with the query conditions
             return model_class(**query_conditions)
 
-class AsyncMongoManager(MongoManagerBase, DatabaseManager):
+class AsyncMongoManager(MongoManagerBase, DocumentDatabaseManager):
     """Asynchronous MongoDB Manager"""
 
     def __init__(self, connection_string: str, database: str, **kwargs):
         super().__init__(connection_string, database)
         self.connect()
+    
+    def is_connected(self) -> bool:
+        """Check if connection is established."""
+        return self.client is not None and hasattr(self, 'db')
 
     def get_collection(self, collection: Union[str, Type[Document], Document]):
         """Get MongoDB collection asynchronously"""
@@ -661,7 +631,12 @@ class AsyncMongoManager(MongoManagerBase, DatabaseManager):
 
 
 class DatabaseFactory:
-    """Factory class for creating database managers."""
+    """Factory class for creating database managers.
+    
+    This factory uses the DatabaseBackendRegistry to create database managers,
+    enabling a plugin-based architecture. It maintains backward compatibility
+    with the old configuration-based approach.
+    """
 
     class DatabaseType:
         """Enum of supported database types."""
@@ -677,6 +652,21 @@ class DatabaseFactory:
     def __init__(self):
         # Store (config, manager) tuples where manager may be None if not yet created
         self._db_store: Dict[str, tuple[Dict, Optional[DatabaseManager]]] = {}
+        
+        # Initialize registry and register built-in backends
+        from core.database.registry import DatabaseBackendRegistry
+        from core.database.plugins import register_builtin_backends, discover_database_plugins
+        
+        self._registry = DatabaseBackendRegistry
+        
+        # Register built-in backends
+        register_builtin_backends()
+        
+        # Try to discover plugins (non-blocking if package doesn't exist)
+        try:
+            discover_database_plugins()
+        except Exception as e:
+            logger.debug(f"Plugin discovery failed (non-critical): {e}")
 
     def register_config(self, name: str, config: Dict):
         """Register a database configuration."""
@@ -711,71 +701,158 @@ class DatabaseFactory:
             raise ValueError(f"Connection string generation not supported for {db_type}")
 
     def create_manager(self, name: str, async_mode: bool = False) -> DatabaseManager:
-        """Create a database manager instance."""
+        """Create a database manager instance using the registry.
+        
+        This method uses the DatabaseBackendRegistry to create managers,
+        with fallback to legacy creation logic for backward compatibility.
+        
+        Args:
+            name: Name of the registered database configuration
+            async_mode: Whether to use async manager (if available)
+        
+        Returns:
+            DatabaseManager instance
+        
+        Raises:
+            KeyError: If no configuration is registered for the name
+            ValueError: If backend creation fails
+        """
         if name not in self._db_store:
             raise KeyError(f"No configuration registered for '{name}'")
 
-        config, manager = self._db_store[name]
+        config_dict, manager = self._db_store[name]
         if manager is None:
-            config = config.copy()
-            db_type = config.pop('type', 'mongo')  # Default to mongo if type not specified
-
-            if db_type == self.DatabaseType.POSTGRES:
-                if async_mode:
-                    raise ValueError("Async mode not supported for PostgreSQL")
-                manager = PostgresDatabaseManagerImpl()
-                manager.engine_info = config['engine_info']
-                manager.database_type = 'postgres'
-                try:
-                    manager.connect(config.get('show_sql_query', False))
-                except OperationalError as oe:
-                    msg = str(oe).lower()
-                    if auto_config.AUTO_CREATE_DATABASE and ('does not exist' in msg or ('database' in msg and 'does not exist' in msg)):
+            config_dict = config_dict.copy()
+            db_type = config_dict.get('type', 'mongo')  # Default to mongo if type not specified
+            
+            # Handle async mode
+            if async_mode and db_type in ['milvus', 'qdrant', 'mongo']:
+                db_type = f"{db_type}_async"
+            
+            # Try to create using registry (new approach)
+            try:
+                from core.database.config import DatabaseConnectionConfig
+                
+                # Convert config dict to DatabaseConnectionConfig
+                # Preserve all fields for backward compatibility
+                config = DatabaseConnectionConfig(**config_dict)
+                
+                # Try registry-based creation
+                manager = self._registry.create(db_type, config, async_mode=async_mode)
+                
+                # For special cases that need additional setup, handle them
+                if db_type == self.DatabaseType.POSTGRES or db_type == self.DatabaseType.SQLITE or db_type == self.DatabaseType.MYSQL:
+                    # SQL databases need engine_info and connection setup
+                    if isinstance(manager, PostgresDatabaseManagerImpl):
+                        manager.engine_info = config_dict.get('engine_info')
+                        manager.database_type = db_type
                         try:
-                            # Parse URL and connect to default 'postgres' database to create the target DB
-                            url = make_url(manager.engine_info)
-                            target_db = url.database
-                            admin_url = url.set(database='postgres')
-                            logger.info(f"Database '{target_db}' does not exist. AUTO_CREATE_DATABASE enabled: attempting to create it on host {admin_url.host}.")
-                            admin_engine = create_engine(str(admin_url))
-                            with admin_engine.connect() as conn:
-                                conn = conn.execution_options(isolation_level='AUTOCOMMIT')
-                                conn.execute(text(f'CREATE DATABASE "{target_db}"'))
-                            admin_engine.dispose()
-                            # Retry manager.connect
-                            manager.connect(config.get('show_sql_query', False))
-                        except Exception as ex:
-                            logger.error(f"Auto-create database failed: {ex}")
-                            raise
-                    else:
-                        # Propagate the original error if auto-create is disabled or the error isn't 'db missing'
-                        raise
-            elif db_type == self.DatabaseType.SQLITE:
-                if async_mode:
-                    raise ValueError("Async mode not supported for SQLite")
-                manager = PostgresDatabaseManagerImpl()  # Reusing PostgresManager for SQLite
-                manager.engine_info = config['engine_info']
-                manager.database_type = 'sqlite'
-                manager.connect()
-            elif db_type == self.DatabaseType.MYSQL:
-                if async_mode:
-                    raise ValueError("Async mode not supported for MySQL")
-                manager = PostgresDatabaseManagerImpl()  # Reusing PostgresManager for MySQL
-                manager.engine_info = config['engine_info']
-                manager.database_type = 'mysql'
-                manager.connect()
-            elif db_type == self.DatabaseType.PDF:
-                raise ValueError(" not supported for PDF manager")
-            elif db_type == self.DatabaseType.MILVUS:
-                from core.base.repository.milvus_repository import MilvusManager
-                manager = MilvusManager(milvus_host=config.get('host', 'localhost'), milvus_port=config.get('port', 19530))
-                manager.connect()
-            else:  # mongo
-                manager = AsyncMongoManager(**config) if async_mode else SyncMongoManager(**config)
-
-            self._db_store[name] = (config, manager)
+                            manager.connect(config_dict.get('show_sql_query', False))
+                        except OperationalError as oe:
+                            # Handle auto-create database for PostgreSQL
+                            msg = str(oe).lower()
+                            if auto_config.AUTO_CREATE_DATABASE and ('does not exist' in msg or ('database' in msg and 'does not exist' in msg)):
+                                try:
+                                    url = make_url(manager.engine_info)
+                                    target_db = url.database
+                                    admin_url = url.set(database='postgres')
+                                    logger.info(f"Database '{target_db}' does not exist. AUTO_CREATE_DATABASE enabled: attempting to create it on host {admin_url.host}.")
+                                    admin_engine = create_engine(str(admin_url))
+                                    with admin_engine.connect() as conn:
+                                        conn = conn.execution_options(isolation_level='AUTOCOMMIT')
+                                        conn.execute(text(f'CREATE DATABASE "{target_db}"'))
+                                    admin_engine.dispose()
+                                    manager.connect(config_dict.get('show_sql_query', False))
+                                except Exception as ex:
+                                    logger.error(f"Auto-create database failed: {ex}")
+                                    raise
+                            else:
+                                raise
+                
+                self._db_store[name] = (config_dict, manager)
+                return manager
+                
+            except (TypeError, ValueError) as e:
+                # Fallback to legacy creation if registry approach fails
+                logger.debug(f"Registry creation failed for {db_type}, falling back to legacy: {e}")
+                manager = self._create_manager_legacy(db_type, config_dict, async_mode)
+                self._db_store[name] = (config_dict, manager)
+                return manager
 
         return self._db_store[name][1]
+    
+    def _create_manager_legacy(self, db_type: str, config_dict: Dict, async_mode: bool) -> DatabaseManager:
+        """Legacy manager creation (for backward compatibility).
+        
+        This method contains the original creation logic as a fallback
+        when registry-based creation fails.
+        
+        Args:
+            db_type: Database type
+            config_dict: Configuration dictionary
+            async_mode: Whether to use async manager
+        
+        Returns:
+            DatabaseManager instance
+        """
+        config = config_dict.copy()
+        
+        config = config_dict.copy()
+        
+        if db_type == self.DatabaseType.POSTGRES:
+            if async_mode:
+                raise ValueError("Async mode not supported for PostgreSQL")
+            manager = PostgresDatabaseManagerImpl()
+            manager.engine_info = config['engine_info']
+            manager.database_type = 'postgres'
+            try:
+                manager.connect(config.get('show_sql_query', False))
+            except OperationalError as oe:
+                msg = str(oe).lower()
+                if auto_config.AUTO_CREATE_DATABASE and ('does not exist' in msg or ('database' in msg and 'does not exist' in msg)):
+                    try:
+                        # Parse URL and connect to default 'postgres' database to create the target DB
+                        url = make_url(manager.engine_info)
+                        target_db = url.database
+                        admin_url = url.set(database='postgres')
+                        logger.info(f"Database '{target_db}' does not exist. AUTO_CREATE_DATABASE enabled: attempting to create it on host {admin_url.host}.")
+                        admin_engine = create_engine(str(admin_url))
+                        with admin_engine.connect() as conn:
+                            conn = conn.execution_options(isolation_level='AUTOCOMMIT')
+                            conn.execute(text(f'CREATE DATABASE "{target_db}"'))
+                        admin_engine.dispose()
+                        # Retry manager.connect
+                        manager.connect(config.get('show_sql_query', False))
+                    except Exception as ex:
+                        logger.error(f"Auto-create database failed: {ex}")
+                        raise
+                else:
+                    # Propagate the original error if auto-create is disabled or the error isn't 'db missing'
+                    raise
+        elif db_type == self.DatabaseType.SQLITE:
+            if async_mode:
+                raise ValueError("Async mode not supported for SQLite")
+            manager = PostgresDatabaseManagerImpl()  # Reusing PostgresManager for SQLite
+            manager.engine_info = config['engine_info']
+            manager.database_type = 'sqlite'
+            manager.connect()
+        elif db_type == self.DatabaseType.MYSQL:
+            if async_mode:
+                raise ValueError("Async mode not supported for MySQL")
+            manager = PostgresDatabaseManagerImpl()  # Reusing PostgresManager for MySQL
+            manager.engine_info = config['engine_info']
+            manager.database_type = 'mysql'
+            manager.connect()
+        elif db_type == self.DatabaseType.PDF:
+            raise ValueError("PDF manager not supported")
+        elif db_type == self.DatabaseType.MILVUS:
+            from core.database.milvus import MilvusManager
+            manager = MilvusManager(milvus_host=config_dict.get('host', 'localhost'), milvus_port=config_dict.get('port', 19530))
+            manager.connect()
+        else:  # mongo
+            manager = AsyncMongoManager(**config_dict) if async_mode else SyncMongoManager(**config_dict)
+
+        return manager
 
     def close(self, name: str):
         """Close specific database manager."""

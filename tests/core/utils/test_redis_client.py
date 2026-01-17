@@ -100,8 +100,9 @@ class TestPing:
     @patch('core.utils.redis_client.get_client')
     async def test_ping_failure(self, mock_get_client):
         """Test ping returns False on failure."""
+        from redis.exceptions import RedisError
         mock_client = AsyncMock()
-        mock_client.ping.side_effect = Exception("Connection error")
+        mock_client.ping.side_effect = RedisError("Connection error")
         mock_get_client.return_value = mock_client
         
         result = await ping()
@@ -174,25 +175,34 @@ class TestCloseConnections:
     """Test cases for close_connections function."""
 
     @pytest.mark.asyncio
-    @patch('core.utils.redis_client._pool')
-    @patch('core.utils.redis_client._client')
-    @patch('core.utils.redis_client._pool_lock')
-    async def test_close_connections(self, mock_lock, mock_client, mock_pool):
+    async def test_close_connections(self):
         """Test close_connections closes client and pool."""
         mock_client_instance = AsyncMock()
-        mock_pool_instance = Mock()
+        mock_pool_instance = AsyncMock()
         mock_lock_instance = AsyncMock()
+        mock_lock_instance.__aenter__ = AsyncMock(return_value=None)
+        mock_lock_instance.__aexit__ = AsyncMock(return_value=None)
         
         # Set up mocks
         import core.utils.redis_client as redis_module
-        redis_module._client = mock_client_instance
-        redis_module._pool = mock_pool_instance
-        redis_module._pool_lock = mock_lock_instance
+        original_client = redis_module._client
+        original_pool = redis_module._pool
+        original_lock = redis_module._pool_lock
         
-        await close_connections()
-        
-        mock_client_instance.close.assert_called_once()
-        mock_pool_instance.disconnect.assert_called_once()
+        try:
+            redis_module._client = mock_client_instance
+            redis_module._pool = mock_pool_instance
+            redis_module._pool_lock = mock_lock_instance
+            
+            await close_connections()
+            
+            mock_client_instance.close.assert_called_once()
+            mock_pool_instance.disconnect.assert_called_once()
+        finally:
+            # Restore original values
+            redis_module._client = original_client
+            redis_module._pool = original_pool
+            redis_module._pool_lock = original_lock
 
 
 class TestGetSettings:

@@ -1,9 +1,20 @@
+from .base import DatabaseManager
 from .postgres import (
-    DatabaseManager,
     DatabaseFactory,
     PostgresDatabaseManagerImpl,
     SQLManager,
     MongoManagerBase,
+)
+from .interfaces import (
+    VectorDatabaseManager,
+    RelationalDatabaseManager,
+    DocumentDatabaseManager,
+    AsyncVectorDatabaseManager,
+)
+from .config import (
+    VectorIndexConfig,
+    VectorCollectionConfig,
+    DatabaseConnectionConfig,
 )
 
 # Optional database backends - only imported if available
@@ -39,5 +50,14 @@ __all__ = [
     "MongoManagerBase",
     "MilvusManager",
     "QdrantManager",
+    # New interfaces
+    "VectorDatabaseManager",
+    "RelationalDatabaseManager",
+    "DocumentDatabaseManager",
+    "AsyncVectorDatabaseManager",
+    # Configuration models
+    "VectorIndexConfig",
+    "VectorCollectionConfig",
+    "DatabaseConnectionConfig",
 ]
 

@@ -18,12 +18,74 @@ class InjectionContainer:
     """
     Unified container for managing dependency injection, including database connections
     and general application dependencies.
+    
+    This container supports multiple named instances, allowing different scopes
+    or contexts to have their own dependency registrations.
+    
+    Example:
+        ```python
+        # Create named container
+        container = InjectionContainer.get_instance("my_app")
+        
+        # Use global container (default)
+        container = InjectionContainer.get_instance()  # or use 'context'
+        ```
     """
-    def __init__(self):
+    
+    _instances: Dict[str, 'InjectionContainer'] = {}
+    
+    def __init__(self, name: str = "default"):
+        """Initialize injection container.
+        
+        Args:
+            name: Name of the container instance (default: "default")
+        """
+        self.name = name
         self._dependencies: Dict[str, Any] = {}
         self._factories: Dict[str, Callable] = {}
         self._database_factory = DatabaseFactory()
         self._database_configs = {}
+    
+    @classmethod
+    def get_instance(cls, name: str = "default") -> 'InjectionContainer':
+        """Get or create a named container instance.
+        
+        This method implements a singleton pattern per name, ensuring that
+        the same name always returns the same instance.
+        
+        Args:
+            name: Container name (default: "default")
+        
+        Returns:
+            InjectionContainer instance
+        """
+        if not hasattr(cls, '_instances'):
+            cls._instances = {}
+        
+        if name not in cls._instances:
+            cls._instances[name] = cls(name)
+            logger.debug(f"Created new InjectionContainer instance: {name}")
+        
+        return cls._instances[name]
+    
+    @classmethod
+    def clear_instance(cls, name: str) -> None:
+        """Clear a named container instance.
+        
+        Args:
+            name: Container name to clear
+        """
+        if hasattr(cls, '_instances') and name in cls._instances:
+            del cls._instances[name]
+            logger.debug(f"Cleared InjectionContainer instance: {name}")
+    
+    @classmethod
+    def clear_all_instances(cls) -> None:
+        """Clear all container instances."""
+        if hasattr(cls, '_instances'):
+            count = len(cls._instances)
+            cls._instances.clear()
+            logger.info(f"Cleared {count} InjectionContainer instance(s)")
 
     #
     # General dependency injection methods
@@ -506,29 +568,38 @@ class InjectionContainer:
         logger.debug(f"Extracted patterns for '{db_name_or_prefix}': {unique_patterns}")
         return unique_patterns
 
-# Create global instance of InjectionContainer for easy access
-context = InjectionContainer()
+# Create global instance of InjectionContainer for easy access (backward compatibility)
+# This uses the "default" instance
+context = InjectionContainer.get_instance("default")
 
-# Helper functions that use the global injector instance
+# Track current context for scoped operations
+context._current = context
+
+# Helper functions that use the current context (defaults to global context)
 def inject(*dependencies: str) -> Callable:
-    """Global inject decorator using the container"""
-    return context.inject(*dependencies)
+    """Global inject decorator using the current context"""
+    current = getattr(context, '_current', context)
+    return current.inject(*dependencies)
 
 def inject_class(*dependencies: str) -> Callable:
-    """Global inject_class decorator using the container"""
-    return context.inject_class(*dependencies)
+    """Global inject_class decorator using the current context"""
+    current = getattr(context, '_current', context)
+    return current.inject_class(*dependencies)
 
 def register(name: str, dependency: Any) -> None:
-    """Global register function using the container"""
-    context.register(name, dependency)
+    """Global register function using the current context"""
+    current = getattr(context, '_current', context)
+    current.register(name, dependency)
 
 def register_factory(name: str, factory: Callable) -> None:
-    """Global register_factory function using the container"""
-    context.register_factory(name, factory)
+    """Global register_factory function using the current context"""
+    current = getattr(context, '_current', context)
+    current.register_factory(name, factory)
 
 def get(name: str) -> Any:
-    """Global get function using the container"""
-    return context.get(name)
+    """Global get function using the current context"""
+    current = getattr(context, '_current', context)
+    return current.get(name)
 
 def inject_database(db_name: str = None, async_mode: bool = False):
     """Global inject_database decorator using the container"""
@@ -564,9 +635,19 @@ def get_database_manager(name: str, async_mode: bool = False) -> DatabaseManager
 
 @contextmanager
 def database_session(db_name: str, async_mode: bool = False):
-    """Global database_session context manager using the container"""
-    with context.database_session(db_name, async_mode) as manager:
-        yield manager
+    """Global database_session context manager using the current context"""
+    current = getattr(context, '_current', context)
+    if hasattr(current, 'database_session'):
+        with current.database_session(db_name, async_mode) as manager:
+            yield manager
+    else:
+        # Fallback: use get_database_manager
+        manager = current.get_database_manager(db_name, async_mode)
+        try:
+            yield manager
+        finally:
+            # Cleanup if needed
+            pass
 
 def with_database(db_name_or_prefix: str, async_mode: bool = False):
         """
@@ -619,6 +700,35 @@ def with_database(db_name_or_prefix: str, async_mode: bool = False):
             except KeyError:
                 logger.error(f"Failed to auto-register database '{db_name_or_prefix}'. Please check your configuration.")
                 return None
+
+
+@contextmanager
+def container_scope(container_name: str = "default"):
+    """Context manager for scoped dependency injection.
+    
+    This allows temporarily switching to a different container instance
+    within a context, useful for testing or isolated execution contexts.
+    
+    Args:
+        container_name: Name of the container to use in this scope
+    
+    Example:
+        ```python
+        with container_scope("test"):
+            # All DI operations in this block use the "test" container
+            register("test_db", test_database)
+            db = get("test_db")
+        # Back to default container
+        ```
+    """
+    old_context = getattr(context, '_current', context)
+    new_context = InjectionContainer.get_instance(container_name)
+    context._current = new_context
+    try:
+        yield new_context
+    finally:
+        context._current = old_context or context
+
 
 # Example usage for clarity
 if __name__ == "__main__":

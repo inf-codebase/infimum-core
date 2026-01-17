@@ -11,36 +11,36 @@ class TestBaseEntity:
 
     def test_tablename_generation(self):
         """Test automatic table name generation from class name."""
-        class TestEntity(BaseEntity):
+        class TablenameTestEntity(BaseEntity):
             name = Column(String(100))
         
-        assert TestEntity.__tablename__() == "testentity"
+        assert TablenameTestEntity.__tablename__() == "tablenametestentity"
 
     def test_entity_initialization_with_kwargs(self):
         """Test entity initialization with keyword arguments."""
-        class TestEntity(BaseEntity):
+        class InitTestEntity(BaseEntity):
             name = Column(String(100))
             age = Column(Integer)
         
-        entity = TestEntity(name="Test", age=25)
+        entity = InitTestEntity(name="Test", age=25)
         assert entity.name == "Test"
         assert entity.age == 25
 
     def test_entity_has_default_columns(self):
         """Test that BaseEntity has id, created_at, updated_at columns."""
-        class TestEntity(BaseEntity):
+        class DefaultColumnsTestEntity(BaseEntity):
             pass
         
-        assert hasattr(TestEntity, 'id')
-        assert hasattr(TestEntity, 'created_at')
-        assert hasattr(TestEntity, 'updated_at')
+        assert hasattr(DefaultColumnsTestEntity, 'id')
+        assert hasattr(DefaultColumnsTestEntity, 'created_at')
+        assert hasattr(DefaultColumnsTestEntity, 'updated_at')
 
     def test_entity_ignores_unknown_attributes(self):
         """Test that unknown attributes are ignored during initialization."""
-        class TestEntity(BaseEntity):
+        class IgnoreUnknownTestEntity(BaseEntity):
             name = Column(String(100))
         
-        entity = TestEntity(name="Test", unknown_attr="ignored")
+        entity = IgnoreUnknownTestEntity(name="Test", unknown_attr="ignored")
         assert not hasattr(entity, 'unknown_attr')
 
 
