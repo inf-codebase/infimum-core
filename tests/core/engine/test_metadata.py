@@ -53,11 +53,11 @@ class TestCreateDtoClass:
 
     def test_create_dto_from_entity(self):
         """Test creating DTO from entity class."""
-        class UserEntity(BaseEntity):
+        class CreateDtoFromEntityUserEntity(BaseEntity):
             name = Column(String(100))
             age = Column(Integer)
         
-        UserDTO = create_dto_class(UserEntity)
+        UserDTO = create_dto_class(CreateDtoFromEntityUserEntity)
         
         assert issubclass(UserDTO, BaseModel)
         dto = UserDTO(name="Test", age=25)
@@ -66,20 +66,20 @@ class TestCreateDtoClass:
 
     def test_create_dto_with_custom_name(self):
         """Test creating DTO with custom name."""
-        class UserEntity(BaseEntity):
+        class CustomNameUserEntity(BaseEntity):
             name = Column(String(100))
         
-        CustomDTO = create_dto_class(UserEntity, "CustomUserDTO")
+        CustomDTO = create_dto_class(CustomNameUserEntity, "CustomUserDTO")
         
         assert CustomDTO.__name__ == "CustomUserDTO"
 
     def test_create_dto_excludes_relationships(self):
         """Test that DTO excludes relationship fields."""
-        class UserEntity(BaseEntity):
+        class ExcludeRelationshipsUserEntity(BaseEntity):
             name = Column(String(100))
             user_id = Column(Integer, ForeignKey('other.id'))
         
-        UserDTO = create_dto_class(UserEntity)
+        UserDTO = create_dto_class(ExcludeRelationshipsUserEntity)
         
         # user_id should be excluded
         dto = UserDTO(name="Test")
@@ -93,15 +93,15 @@ class TestCreateDtosForEntities:
 
     def test_create_dtos_for_multiple_entities(self):
         """Test creating DTOs for multiple entities."""
-        class UserEntity(BaseEntity):
+        class MultipleEntitiesUserEntity(BaseEntity):
             name = Column(String(100))
         
-        class ProductEntity(BaseEntity):
+        class MultipleEntitiesProductEntity(BaseEntity):
             title = Column(String(200))
         
-        dtos = create_dtos_for_entities([UserEntity, ProductEntity])
+        dtos = create_dtos_for_entities([MultipleEntitiesUserEntity, MultipleEntitiesProductEntity])
         
-        assert "UserEntityDTO" in dtos
-        assert "ProductEntityDTO" in dtos
-        assert issubclass(dtos["UserEntityDTO"], BaseModel)
-        assert issubclass(dtos["ProductEntityDTO"], BaseModel)
+        assert "MultipleEntitiesUserEntityDTO" in dtos
+        assert "MultipleEntitiesProductEntityDTO" in dtos
+        assert issubclass(dtos["MultipleEntitiesUserEntityDTO"], BaseModel)
+        assert issubclass(dtos["MultipleEntitiesProductEntityDTO"], BaseModel)

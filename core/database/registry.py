@@ -10,7 +10,7 @@ from typing import Dict, Type, Callable, Optional, List
 from loguru import logger
 
 from core.database.base import DatabaseManager
-from core.database.config import DatabaseConnectionConfig
+from core.database.base import DatabaseConnectionConfig
 
 
 class DatabaseBackendRegistry:
@@ -97,7 +97,7 @@ class DatabaseBackendRegistry:
                 return backend_class.from_config(config, **kwargs)
             else:
                 # Fallback: extract config attributes for backward compatibility
-                config_dict = config.dict(exclude_none=True)
+                config_dict = config.model_dump(exclude_none=True)
                 return backend_class(**config_dict, **kwargs)
         
         # Backend not found

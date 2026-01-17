@@ -16,8 +16,9 @@ from core.database.interfaces import (
 )
 from core.database.milvus import MilvusManager
 from core.database.qdrant import QdrantManager
-from core.database.postgres import PostgresDatabaseManagerImpl, SyncMongoManager
-from core.database.config import VectorIndexConfig, DatabaseConnectionConfig
+from core.database.postgres import PostgresDatabaseManagerImpl
+from core.database.mongo import SyncMongoManager
+from core.database.base import VectorIndexConfig, DatabaseConnectionConfig
 
 
 class TestVectorDatabaseManagerInterface:
@@ -101,6 +102,7 @@ class TestDocumentDatabaseManagerInterface:
     def test_document_managers_have_required_methods(self):
         """Test that document managers have all required interface methods."""
         from unittest.mock import patch, MagicMock
+        import core.database.mongo as mongo_module
         
         # Mock MongoClient to avoid actual connection and ImportError
         mock_client_class = MagicMock()
@@ -110,9 +112,9 @@ class TestDocumentDatabaseManagerInterface:
         mock_client_instance.__getitem__.return_value = mock_db
         mock_client_class.return_value = mock_client_instance
         
-        # Patch MongoClient in the postgres module
+        # Patch MongoClient in the mongo module
         # This replaces the None value with a mock class
-        with patch('core.database.postgres.MongoClient', mock_client_class):
+        with patch.object(mongo_module, 'MongoClient', mock_client_class):
             # Use a mock connection string for testing
             manager = SyncMongoManager(
                 connection_string="mongodb://localhost:27017",
@@ -120,10 +122,14 @@ class TestDocumentDatabaseManagerInterface:
             )
             
             # Verify that client and db were set by connect()
-            assert hasattr(manager, 'client')
-            assert manager.client is not None
-            assert hasattr(manager, 'db')
-            assert manager.db is not None
+            assert hasattr(manager, 'client'), "Manager should have 'client' attribute after connect()"
+            assert manager.client is not None, "Manager.client should not be None"
+            assert hasattr(manager, 'db'), "Manager should have 'db' attribute after connect()"
+            assert manager.db is not None, "Manager.db should not be None"
+            
+            # Verify the mock was called correctly
+            mock_client_class.assert_called_once_with("mongodb://localhost:27017")
+            mock_client_instance.__getitem__.assert_called_once_with("test_db")
             
             # Check all abstract methods exist
             assert hasattr(manager, 'get_collection')
@@ -171,7 +177,7 @@ class TestInterfaceCompliance:
     
     def test_configuration_model_usage(self):
         """Test that managers can use configuration models."""
-        from core.database.config import VectorIndexConfig, DatabaseConnectionConfig
+        from core.database.base import VectorIndexConfig, DatabaseConnectionConfig
         
         # Test VectorIndexConfig
         index_config = VectorIndexConfig(

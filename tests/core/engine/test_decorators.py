@@ -7,8 +7,12 @@ from core.engine.decorators import (
     ParameterizedInjection,
     _safe_to_dict,
     _pick,
-    vlm_persist_after
 )
+try:
+    from core.ai.vlm.decorators import vlm_persist_after
+except ImportError:
+    # Fallback to old location for backward compatibility
+    from core.engine.decorators import vlm_persist_after
 
 
 class TestFuncDecorator:

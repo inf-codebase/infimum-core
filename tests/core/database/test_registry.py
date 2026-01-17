@@ -8,7 +8,7 @@ creation, and discovery of database backends.
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 from core.database.registry import DatabaseBackendRegistry
-from core.database.config import DatabaseConnectionConfig
+from core.database.base import DatabaseConnectionConfig
 from core.database.base import DatabaseManager
 from core.database.milvus import MilvusManager
 from core.database.qdrant import QdrantManager

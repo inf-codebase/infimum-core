@@ -105,7 +105,7 @@ def register_builtin_backends() -> None:
     from core.database.postgres import PostgresDatabaseManagerImpl
     from core.database.milvus import MilvusManager, AsyncMilvusManager
     from core.database.qdrant import QdrantManager, AsyncQdrantManager
-    from core.database.postgres import SyncMongoManager, AsyncMongoManager
+    from core.database.mongo import SyncMongoManager, AsyncMongoManager
     
     # Register sync backends
     DatabaseBackendRegistry.register("postgres", PostgresDatabaseManagerImpl)

@@ -3,15 +3,37 @@ from .postgres import (
     DatabaseFactory,
     PostgresDatabaseManagerImpl,
     SQLManager,
-    MongoManagerBase,
 )
+try:
+    from .mongo import SyncMongoManager, AsyncMongoManager, MongoManagerBase
+except ImportError as e:
+    # Create placeholder classes that provide helpful error messages
+    class SyncMongoManager:
+        """Placeholder for SyncMongoManager when pymongo is not installed."""
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "SyncMongoManager requires 'pymongo' to be installed. "
+                "Install it with: pip install -e '.[mongo]' or pip install pymongo>=4.16.0"
+            ) from e
+    
+    class AsyncMongoManager:
+        """Placeholder for AsyncMongoManager when motor is not installed."""
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "AsyncMongoManager requires 'motor' to be installed. "
+                "Install it with: pip install -e '.[mongo]' or pip install motor>=3.0.0"
+            ) from e
+    
+    class MongoManagerBase:
+        """Placeholder for MongoManagerBase when pymongo is not installed."""
+        pass
 from .interfaces import (
     VectorDatabaseManager,
     RelationalDatabaseManager,
     DocumentDatabaseManager,
     AsyncVectorDatabaseManager,
 )
-from .config import (
+from .base import (
     VectorIndexConfig,
     VectorCollectionConfig,
     DatabaseConnectionConfig,
@@ -48,6 +70,8 @@ __all__ = [
     "PostgresDatabaseManagerImpl",
     "SQLManager",
     "MongoManagerBase",
+    "SyncMongoManager",
+    "AsyncMongoManager",
     "MilvusManager",
     "QdrantManager",
     # New interfaces

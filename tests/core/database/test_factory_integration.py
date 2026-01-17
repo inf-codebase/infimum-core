@@ -9,7 +9,6 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from core.database.postgres import DatabaseFactory
 from core.database.registry import DatabaseBackendRegistry
-from core.database.config import DatabaseConnectionConfig
 from core.database.milvus import MilvusManager
 
 

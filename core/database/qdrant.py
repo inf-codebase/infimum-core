@@ -6,7 +6,7 @@ from qdrant_client.http.models import PointStruct, Filter
 
 from core.database.base import DatabaseManager
 from core.database.interfaces import VectorDatabaseManager
-from core.database.config import DatabaseConnectionConfig, VectorIndexConfig
+from core.database.base import DatabaseConnectionConfig, VectorIndexConfig
 
 logger = logging.getLogger(__name__)
 

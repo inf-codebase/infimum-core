@@ -56,7 +56,8 @@ class TestDocument:
 
     def test_document_with_values(self):
         """Test Document initialization with values."""
-        now = datetime.utcnow()
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
         doc = Document(id="123", created_at=now, updated_at=now)
         assert doc.id == "123"
         assert doc.created_at == now
@@ -64,7 +65,8 @@ class TestDocument:
 
     def test_document_to_dict(self):
         """Test Document to_dict method."""
-        doc = Document(id="123", created_at=datetime.utcnow())
+        from datetime import timezone
+        doc = Document(id="123", created_at=datetime.now(timezone.utc))
         result = doc.to_dict()
         assert isinstance(result, dict)
         assert result.get("id") == "123"

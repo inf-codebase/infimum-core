@@ -7,7 +7,7 @@ and validation.
 
 import pytest
 from pydantic import ValidationError
-from core.database.config import (
+from core.database.base import (
     VectorIndexConfig,
     VectorCollectionConfig,
     DatabaseConnectionConfig,
@@ -143,7 +143,7 @@ class TestDatabaseConnectionConfig:
             database="test_db"
         )
         
-        config_dict = config.dict(exclude_none=True)
+        config_dict = config.model_dump(exclude_none=True)
         
         assert config_dict["host"] == "localhost"
         assert config_dict["port"] == 5432
