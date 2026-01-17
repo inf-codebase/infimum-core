@@ -3,7 +3,7 @@ from datetime import datetime
 from sklearn.metrics.pairwise import cosine_similarity
 import openai
 import logging
-from src.core.utils import auto_config
+from core.utils import auto_config
 from .prompts import MEMORY_PROMPTS  # Import the centralized prompts
 
 logger = logging.getLogger(__name__)

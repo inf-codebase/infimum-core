@@ -10,7 +10,7 @@ Các tiện ích làm việc với RTSP / video bằng OpenCV:
 - Tính histogram HS + so sánh độ tương tự (dùng để skip frame giống nhau)
 
 Gợi ý sử dụng:
-    from src.core.utils.rtsp_utils import (
+    from core.utils.rtsp_utils import (
         ensure_rtsp_env, set_rtsp_env,
         open_capture, read_one_frame,
         validate_rtsp_connect, capture_preview,

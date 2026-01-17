@@ -1,5 +1,5 @@
 from typing import Dict, List, Type, Set
-from src.core.base.entity import BaseEntity
+from core.base.entity import BaseEntity
 import importlib
 import pkgutil
 import inspect
@@ -64,8 +64,8 @@ class EntityRegistry:
     @classmethod
     def discover_entities(cls, package_path):
         if not package_path:
-            logger.warning("No package path provided for entity discovery, using default 'src.entities'")
-            package_path = 'src.entities'
+            logger.warning("No package path provided for entity discovery, using default 'entities'")
+            package_path = 'entities'
         
         try:
             # Import the package

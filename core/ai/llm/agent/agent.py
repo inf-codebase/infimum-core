@@ -4,7 +4,7 @@ import json
 import logging
 from .planner import Planner
 from .memory import Memory
-from src.core.utils import auto_config
+from core.utils import auto_config
 from .tools import ToolManager
 from loguru import logger
 from .prompts import AGENT_PROMPTS  # Import the centralized prompts

@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, text
 import pandas as pd
 from typing import Any, Collection, Dict, List, Optional, Union, Type
-from src.core.base.entity import Document
-from src.core.utils import auto_config
+from core.base.entity import Document
+from core.utils import auto_config
 from sqlalchemy.orm import sessionmaker
 from abc import abstractmethod
 import numpy as np
@@ -231,7 +231,7 @@ class SQLManager(DatabaseManager):
             entities (list, optional): List of entity classes. If None, creates all tables bound to the metadata.
             drop_first (bool, optional): If True, drops all tables before creating them.
         """
-        from src.core.base.entity import BaseEntity
+        from core.base.entity import BaseEntity
 
         try:
             if drop_first:
@@ -757,7 +757,7 @@ class DatabaseFactory:
             elif db_type == self.DatabaseType.PDF:
                 raise ValueError(" not supported for PDF manager")
             elif db_type == self.DatabaseType.MILVUS:
-                from src.core.base.repository.milvus_repository import MilvusManager
+                from core.base.repository.milvus_repository import MilvusManager
                 manager = MilvusManager(milvus_host=config.get('host', 'localhost'), milvus_port=config.get('port', 19530))
                 manager.connect()
             else:  # mongo

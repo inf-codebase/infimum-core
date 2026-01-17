@@ -18,7 +18,7 @@ from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
 from redis.exceptions import RedisError
 
-from src.core.utils import auto_config
+from core.utils import auto_config
 
 logger = logging.getLogger(__name__)
 

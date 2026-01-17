@@ -4,11 +4,11 @@ import random
 
 from bs4 import BeautifulSoup
 
-from src.core.ai.preprocessing.crawling_utils import jina_read_content, parse_proxy_url
+from core.ai.preprocessing.crawling_utils import jina_read_content, parse_proxy_url
 
-from src.core.engine import ParameterizedInjection
-from src.core.utils.constants import CrawlingType
-from src.core.utils import auto_config
+from core.engine import ParameterizedInjection
+from core.utils.constants import CrawlingType
+from core.utils import auto_config
 import requests
 import json
 import re

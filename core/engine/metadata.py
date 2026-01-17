@@ -1,6 +1,6 @@
 from typing import Type, get_type_hints, Optional, List, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict, create_model
-from src.core.base.entity import BaseEntity
+from core.base.entity import BaseEntity
 from sqlalchemy.orm import Mapped
 
 def create_dynamic_class(class_name: str, attributes: dict = {}, base_classes: tuple = (object,)) -> type:

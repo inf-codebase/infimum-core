@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from qdrant_client import QdrantClient, models, AsyncQdrantClient
 from qdrant_client.http.models import PointStruct, Filter
 
-from src.core.database.postgres import DatabaseManager
+from core.database.postgres import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

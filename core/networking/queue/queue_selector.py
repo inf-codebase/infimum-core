@@ -13,7 +13,7 @@ Queue naming convention (adapted to celery_app configuration):
 """
 import hashlib
 from typing import Literal
-from src.core.utils import auto_config
+from core.utils import auto_config
 
 QueueType = Literal["fastvlm.gpu", "general.cpu"]
 

@@ -5,7 +5,7 @@ Provides reusable patterns for distributing batch work across multiple Celery wo
 This allows full utilization of all available GPU/CPU workers for parallel processing.
 
 Usage Example:
-    from src.core.networking.queue.distributed_tasks import distribute_batch_task
+    from core.networking.queue.distributed_tasks import distribute_batch_task
 
     # Automatically chunks and distributes items across workers
     result = distribute_batch_task(
@@ -22,9 +22,9 @@ from typing import List, Dict, Any, Optional, Callable
 from time import time as now
 from loguru import logger
 
-from src.core.utils import auto_config
-from src.core.networking.queue.celery_app import celery_app
-from src.core.networking.queue.queue_selector import select_queue
+from core.utils import auto_config
+from core.networking.queue.celery_app import celery_app
+from core.networking.queue.queue_selector import select_queue
 
 
 def distribute_batch_task(
@@ -58,7 +58,7 @@ def distribute_batch_task(
         GroupResult: Celery group result for tracking all tasks
 
     Example:
-        >>> from src.core.networking.queue.analyze_image_tasks import batch_analyze_task
+        >>> from core.networking.queue.analyze_image_tasks import batch_analyze_task
         >>>
         >>> items = [{"temp_path": "img1.jpg", "prompt": "Describe"}] * 100
         >>> result = distribute_batch_task(
@@ -290,7 +290,7 @@ def create_distributed_task_wrapper(
         >>> # Use it anywhere
         >>> result = submit_fastvlm_batch(items=image_list, enqueue_ts=time.time())
     """
-    from src.core.networking.queue.celery_app import celery_app
+    from core.networking.queue.celery_app import celery_app
 
     task = celery_app.tasks[task_name]
 
@@ -348,7 +348,7 @@ def submit_distributed_fastvlm_batch(items: List[Dict[str, Any]], **kwargs) -> D
         >>> result = submit_distributed_fastvlm_batch(items, enqueue_ts=time.time())
         >>> print(result["task_id"])
     """
-    from src.core.networking.queue.analyze_image_tasks import batch_analyze_task
+    from core.networking.queue.analyze_image_tasks import batch_analyze_task
 
     queue = select_queue(prefer_gpu=True)
     chunk_size = kwargs.pop('chunk_size', auto_config.VLM_BATCH_SIZE)

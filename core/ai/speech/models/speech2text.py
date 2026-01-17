@@ -6,10 +6,10 @@ Provides simple high-level API hiding complexity of providers and preprocessing.
 
 from typing import Union, Optional
 from pathlib import Path
-from ...core.providers.factory import ProviderFactory
-from ...core.providers.config import ModelConfigBuilder
-from ...core.data.factory import LoaderFactory
-from ...core.preprocessing.factory import TransformFactory
+from ...base.providers.factory import ProviderFactory
+from ...base.providers.config import ModelConfigBuilder
+from ...base.data.factory import LoaderFactory
+from ...base.preprocessing.factory import TransformFactory
 
 
 class Speech2Text:

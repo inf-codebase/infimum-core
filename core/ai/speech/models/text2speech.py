@@ -6,8 +6,8 @@ Provides simple high-level API hiding complexity of providers and preprocessing.
 
 from typing import Union, Optional
 from pathlib import Path
-from ...core.providers.factory import ProviderFactory
-from ...core.providers.config import ModelConfigBuilder
+from ...base.providers.factory import ProviderFactory
+from ...base.providers.config import ModelConfigBuilder
 
 
 class Text2Speech:

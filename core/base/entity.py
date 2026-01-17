@@ -2,7 +2,7 @@ from typing import Optional, Any
 from pydantic import BaseModel
 from datetime import datetime
 
-from src.core.utils import string_utils
+from core.utils import string_utils
 from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.orm import DeclarativeBase
 

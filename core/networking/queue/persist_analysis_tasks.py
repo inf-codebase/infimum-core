@@ -3,9 +3,9 @@ from typing import Dict, Any, Optional
 from celery import states
 from celery.utils.log import get_task_logger
 
-from src.core.networking.queue.celery_app import celery_app
-from src.features.ai_models.entities.vlm_analysis import VLMAnalysis
-from src.features.ai_models.repositories.vlm_analysis_repository import VLMAnalysisRepository
+from core.networking.queue.celery_app import celery_app
+from features.ai_models.entities.vlm_analysis import VLMAnalysis
+from features.ai_models.repositories.vlm_analysis_repository import VLMAnalysisRepository
 
 logger = get_task_logger(__name__)
 

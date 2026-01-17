@@ -4,7 +4,7 @@ import math
 import os
 import re
 
-from src.core.utils import auto_config
+from core.utils import auto_config
 
 class ToolManager:
     def __init__(self, tools=None):

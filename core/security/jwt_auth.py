@@ -1,9 +1,9 @@
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.features.user_management.entities.user import User
-from src.features.user_management.services.jwt_service import JWTService
-from src.features.user_management.services.auth_service import AuthService
+from features.user_management.entities.user import User
+from features.user_management.services.jwt_service import JWTService
+from features.user_management.services.auth_service import AuthService
 
 # JWT Bearer security scheme
 security = HTTPBearer()

@@ -1,7 +1,7 @@
 from typing import List, Union
 import logging
 from openai import OpenAI
-from src.core.utils import auto_config
+from core.utils import auto_config
 from loguru import logger
 
 openai_client = OpenAI(api_key=auto_config.OPENAI_API_KEY)

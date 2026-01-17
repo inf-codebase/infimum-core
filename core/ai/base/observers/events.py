@@ -3,7 +3,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
-from datetime import datetime
+from datetime import UTC, datetime, timezone
 
 
 class EventType(str, Enum):
@@ -48,7 +48,7 @@ class Event:
     def __post_init__(self):
         """Set timestamp if not provided."""
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.now(UTC)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary."""

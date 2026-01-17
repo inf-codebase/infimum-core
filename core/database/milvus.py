@@ -33,7 +33,7 @@ from pymilvus import (
     DataType,
 )
 
-from src.core.database.postgres import DatabaseManager
+from core.database.postgres import DatabaseManager
 
 logger = logging.getLogger(__name__)
 

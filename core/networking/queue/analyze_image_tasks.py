@@ -4,12 +4,12 @@ import logging
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
-from src.features.ai_models.services.fastvlm_service import get_fastvlm_service
+from features.ai_models.services.fastvlm_service import get_fastvlm_service
 import os
 from types import SimpleNamespace
-from src.core.ai.visual_language_model.fastvlm_inference import predict_batch,predict_batch_true_batched
+from core.ai.visual_language_model.fastvlm_inference import predict_batch,predict_batch_true_batched
 from loguru import logger
-from src.core.utils import auto_config
+from core.utils import auto_config
 
 @shared_task(bind=True, name="fastvlm.analyze_image")
 def analyze_image_task(self, temp_path: str, prompt: str, enqueue_ts: float = None):

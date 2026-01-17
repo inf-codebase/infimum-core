@@ -1,5 +1,5 @@
 import openai
-from src.core.utils import auto_config
+from core.utils import auto_config
 import json
 import logging
 from .prompts import PLANNER_PROMPTS  # Import the centralized prompts

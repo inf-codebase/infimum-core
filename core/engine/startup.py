@@ -1,10 +1,10 @@
-from src.core.database import DatabaseFactory
-from src.core.engine.context import context
+from core.database import DatabaseFactory
+from core.engine.context import context
 from fastapi import FastAPI
-from src.core.engine.decorators import func_decorator
+from core.engine.decorators import func_decorator
 from loguru import logger
-from src.core.utils.auto_config import get_config_by_prefixes
-from src.core.base.registry import EntityRegistry  # Import the registry
+from core.utils.auto_config import get_config_by_prefixes
+from core.base.registry import EntityRegistry  # Import the registry
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -18,7 +18,7 @@ class Startup:
         return func_decorator
 
     @staticmethod
-    def initialize(create_tables=True, discover_entities=True, entities_package='src.entities'):
+    def initialize(create_tables=True, discover_entities=True, entities_package='entities'):
         try:
             # Discover entities if requested
             if discover_entities:

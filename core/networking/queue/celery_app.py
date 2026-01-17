@@ -3,7 +3,7 @@ from celery import Celery
 from celery.schedules import crontab
 from kombu import Queue, Exchange
 from dotenv import load_dotenv
-from src.core.utils import auto_config
+from core.utils import auto_config
 
 # Load .env
 load_dotenv(override=False)
@@ -85,9 +85,9 @@ celery_app.conf.update(
     result_backend=BACKEND_URL,
 
     include=[
-        "src.core.networking.queue.persist_analysis_tasks",
-        "src.core.networking.queue.analyze_image_tasks",
-        "src.customers.classroom_vision.core.networking.queue.attendance_tasks",
+        "core.networking.queue.persist_analysis_tasks",
+        "core.networking.queue.analyze_image_tasks",
+        "customers.classroom_vision.core.networking.queue.attendance_tasks",
     ],
 
     task_queues=_generate_task_queues(),
@@ -99,15 +99,15 @@ celery_app.conf.update(
 
     # Routing rules
     task_routes={
-        "src.core.networking.queue.analyze_image_tasks.*": {
+        "core.networking.queue.analyze_image_tasks.*": {
             "queue": "fastvlm.gpu",
             "routing_key": "fastvlm.gpu",
         },
-        "src.core.networking.queue.persist_analysis_tasks.*": {
+        "core.networking.queue.persist_analysis_tasks.*": {
             "queue": "general.cpu",
             "routing_key": "general.cpu",
         },
-        "src.customers.classroom_vision.core.networking.queue.attendance_tasks.*": {
+        "customers.classroom_vision.core.networking.queue.attendance_tasks.*": {
             "queue": "general.cpu",
             "routing_key": "general.cpu",
         },

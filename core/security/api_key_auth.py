@@ -1,10 +1,10 @@
 from typing import Optional
 
-from src.core.utils import auto_config
+from core.utils import auto_config
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security.api_key import APIKeyHeader
 
-from src.features.user_management.entities.user import User
+from features.user_management.entities.user import User
 
 # API Key configuration
 API_KEY_NAME = "X-API-KEY"
