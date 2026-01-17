@@ -6,7 +6,12 @@ from core.utils import auto_config
 from sqlalchemy.orm import sessionmaker
 from abc import abstractmethod
 import numpy as np
-from pymongo import MongoClient
+
+# Optional MongoDB import - only needed for MongoDB managers
+try:
+    from pymongo import MongoClient
+except ImportError:
+    MongoClient = None
 
 from contextlib import contextmanager
 from datetime import datetime
@@ -394,6 +399,11 @@ class SyncMongoManager(MongoManagerBase, DatabaseManager):
         return self.client[self.database][collection_name]
 
     def connect(self):
+        if MongoClient is None:
+            raise ImportError(
+                "SyncMongoManager requires 'pymongo' to be installed. "
+                "Install it with: pip install -e '.[mongo]' or pip install pymongo>=4.16.0"
+            )
         if not self.client:
             self.client = MongoClient(self.connection_string)
             self.db = self.client[self.database]

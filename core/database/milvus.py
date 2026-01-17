@@ -21,7 +21,6 @@ Usage:
 Note: Make sure to close the connection when you're done using the manager.
 """
 
-import logging
 from typing import List, Dict, Any, Optional
 
 from pymilvus import (
@@ -34,8 +33,7 @@ from pymilvus import (
 )
 
 from core.database.postgres import DatabaseManager
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class MilvusManager(DatabaseManager):

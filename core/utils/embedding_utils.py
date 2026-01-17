@@ -4,8 +4,6 @@ from openai import OpenAI
 from core.utils import auto_config
 from loguru import logger
 
-openai_client = OpenAI(api_key=auto_config.OPENAI_API_KEY)
-
 def text_to_embedding(texts: Union[str, List[str]]) -> List[List[float]]:
     """
     Transform text or a list of texts into embedding vectors using OpenAI's API.
@@ -27,6 +25,7 @@ def text_to_embedding(texts: Union[str, List[str]]) -> List[List[float]]:
         texts = [texts]
 
     try:
+        openai_client = OpenAI(api_key=auto_config.OPENAI_API_KEY)
         response = openai_client.embeddings.create(
             model=auto_config.OPENAI_TEXT_EMBEDDING_MODEL,
             input=texts
