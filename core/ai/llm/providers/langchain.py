@@ -5,8 +5,8 @@ Adapts RAGQueryEngine to BaseProvider interface.
 """
 
 from typing import Optional
-from ...core.providers.base import BaseProvider, ModelConfig, ModelHandle
-from ...core.providers.registry import ProviderRegistry, ProviderMetadata
+from ...base.providers import BaseProvider, ModelConfig, ModelHandle
+from ...base.providers import ProviderRegistry, ProviderMetadata
 
 
 class LangChainProviderAdapter(BaseProvider):

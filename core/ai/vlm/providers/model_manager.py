@@ -5,8 +5,8 @@ Adapts ModelManager singleton to BaseProvider interface.
 """
 
 from typing import Optional, Tuple, Any
-from ...core.providers.base import BaseProvider, ModelConfig, ModelHandle
-from ...core.providers.registry import ProviderRegistry, ProviderMetadata
+from ...base.providers import BaseProvider, ModelConfig, ModelHandle
+from ...base.providers import ProviderRegistry, ProviderMetadata
 
 
 class ModelManagerProviderAdapter(BaseProvider):

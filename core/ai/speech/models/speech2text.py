@@ -6,8 +6,10 @@ Provides simple high-level API hiding complexity of providers and preprocessing.
 
 from typing import Union, Optional
 from pathlib import Path
+import numpy as np
 from ...base.providers.factory import ProviderFactory
 from ...base.providers.config import ModelConfigBuilder
+from src.entity.transcription_entity import TranscriptionEntity
 
 # Optional factories - may not be implemented yet
 try:
@@ -159,3 +161,59 @@ class Speech2Text:
             List of transcribed texts
         """
         return [self.transcribe(source, language) for source in audio_sources]
+    
+    def transcribe_audio(
+        self,
+        audio_array: np.ndarray,
+        sample_rate: int = 16000,
+        return_confidences: bool = True,
+        return_timestamps: bool = False
+    ) -> TranscriptionEntity:
+        """
+        Transcribe audio from array to TranscriptionEntity.
+        
+        This method is designed for providers that work with audio arrays
+        (like MedASR) and return detailed transcription results with
+        confidence scores.
+        
+        Args:
+            audio_array: Audio array (mono, typically 16kHz)
+            sample_rate: Sample rate of audio (default: 16000)
+            return_confidences: Whether to return confidence scores
+            return_timestamps: Whether to return timestamps
+            
+        Returns:
+            TranscriptionEntity with transcript and metadata
+            
+        Raises:
+            NotImplementedError: If provider doesn't support array-based transcription
+        """
+        # Get model handle
+        handle = self._provider.get_model(self._provider.config)
+        
+        # Check if provider supports transcribe with audio array
+        # MedASR provider has transcribe method that accepts audio_array
+        if hasattr(self._provider, 'transcribe'):
+            # Check provider type by checking if it's MedASRProvider
+            provider_name = self._provider.__class__.__name__
+            
+            if provider_name == "MedASRProvider":
+                # MedASR provider returns TranscriptionEntity directly
+                return self._provider.transcribe(
+                    handle=handle,
+                    audio_array=audio_array,
+                    sample_rate=sample_rate,
+                    return_confidences=return_confidences,
+                    return_timestamps=return_timestamps
+                )
+            else:
+                # For other providers (like Whisper), we'd need to convert array to file
+                # or implement array support. For now, raise error.
+                raise NotImplementedError(
+                    f"Provider {provider_name} does not support array-based transcription. "
+                    f"Use transcribe() method with file path instead."
+                )
+        else:
+            raise NotImplementedError(
+                f"Provider {self._provider.__class__.__name__} does not support transcription"
+            )

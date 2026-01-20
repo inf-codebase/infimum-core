@@ -7,7 +7,6 @@ Uses OpenAI's Whisper library for transcription.
 from typing import Optional
 from ...base.providers.base import BaseProvider, ModelHandle
 from ...base.providers.config import ModelConfig
-from ....engine.package_utils import ensure_package_installed
 
 
 class WhisperProvider(BaseProvider):
@@ -31,6 +30,8 @@ class WhisperProvider(BaseProvider):
         Raises:
             ImportError: If installation fails or import still fails after installation
         """
+        from core.engine.package_utils import ensure_package_installed
+        
         ensure_package_installed(
             package_name="whisper",
             install_name="openai-whisper",

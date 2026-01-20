@@ -132,7 +132,7 @@ class BaseProvider(ABC, Observable):
     
     def _validate_config(self, config: ModelConfig) -> None:
         """
-        Validate configuration - common step, can't be overridden easily.
+        Validate configuration - common step, can be overridden.
         
         Args:
             config: Configuration to validate
@@ -140,8 +140,9 @@ class BaseProvider(ABC, Observable):
         Raises:
             ValueError: If configuration is invalid
         """
-        if not config.model_path:
-            raise ValueError("model_path is required")
+        # Accept either model_path or model_name for flexibility
+        if not config.model_path and not config.model_name:
+            raise ValueError("Either model_path or model_name is required")
     
     def _is_cached(self, config: ModelConfig) -> bool:
         """
