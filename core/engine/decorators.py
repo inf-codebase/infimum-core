@@ -48,12 +48,17 @@ def singleton(cls):
         
         def some_method(self):
             pass
+    
+    Supports parameterized singletons - different instances for different arguments.
     """
     instances = {}
     def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
+        # Create cache key from class and arguments
+        # Use args and sorted kwargs for consistent hashing
+        key = (cls, args, tuple(sorted(kwargs.items())))
+        if key not in instances:
+            instances[key] = cls(*args, **kwargs)
+        return instances[key]
     return get_instance
 
 def _safe_to_dict(obj: Any) -> Dict[str, Any]:
@@ -89,13 +94,13 @@ def _pick(d: Dict[str, Any], *keys, default=None):
 
 def vlm_persist_after(task, queue: str = "vlm", inject_task_id: bool = True):
     """
-    DEPRECATED: This decorator has been moved to core.ai.vlm.decorators.
+    DEPRECATED: This decorator has been moved to src.core.ai.vlm.decorators.
     
     This function is kept for backward compatibility but will be removed
     in a future release. Please update your imports:
     
     OLD: from core.engine.decorators import vlm_persist_after
-    NEW: from core.ai.vlm.decorators import vlm_persist_after
+    NEW: from src.core.ai.vlm.decorators import vlm_persist_after
     
     Args:
         task: Celery task instance for async processing
@@ -109,7 +114,7 @@ def vlm_persist_after(task, queue: str = "vlm", inject_task_id: bool = True):
     from core.ai.vlm.decorators import vlm_persist_after as _new_vlm_persist_after
     
     warnings.warn(
-        "vlm_persist_after has been moved to core.ai.vlm.decorators. "
+        "vlm_persist_after has been moved to src.core.ai.vlm.decorators. "
         "Please update your imports. This compatibility shim will be removed in a future release.",
         DeprecationWarning,
         stacklevel=2
