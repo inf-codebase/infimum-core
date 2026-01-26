@@ -1,0 +1,62 @@
+<div class="container mx-auto py-8 px-4">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">My Profile</h1>
+
+        <div class="grid gap-6">
+            <!-- Profile Header Card -->
+            <app-card>
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="avatar">
+                        <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img [src]="user.avatar" [alt]="user.name" />
+                        </div>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h2 class="text-2xl font-bold">{{ user.name }}</h2>
+                        <p class="text-base-content/70">{{ user.role }}</p>
+                        <p class="text-sm text-base-content/50 mt-1">Member since {{ user.joinedDate }}</p>
+                    </div>
+                    <div>
+                        <app-button [label]="isEditing() ? 'Cancel' : 'Edit Profile'"
+                            [variant]="isEditing() ? 'outline' : 'primary'" (click)="toggleEdit()" />
+                    </div>
+                </div>
+            </app-card>
+
+            <!-- Profile Details Card -->
+            <app-card title="Profile Information">
+                @if (isEditing()) {
+                <form class="flex flex-col gap-4" (ngSubmit)="saveProfile()">
+                    <app-input label="Full Name" [(ngModel)]="user.name" name="name" />
+                    <app-input label="Email" type="email" [(ngModel)]="user.email" name="email" />
+                    <app-input label="Location" [(ngModel)]="user.location" name="location" />
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Bio</span></label>
+                        <textarea class="textarea textarea-bordered" rows="3" [(ngModel)]="user.bio"
+                            name="bio"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <app-button label="Cancel" variant="ghost" (click)="toggleEdit()" />
+                        <app-button label="Save Changes" type="submit" />
+                    </div>
+                </form>
+                } @else {
+                <div class="grid gap-4">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-base-content/50">Email</span>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm text-base-content/50">Location</span>
+                        <span>{{ user.location }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm text-base-content/50">Bio</span>
+                        <span>{{ user.bio }}</span>
+                    </div>
+                </div>
+                }
+            </app-card>
+        </div>
+    </div>
+</div>

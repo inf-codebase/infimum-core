@@ -1,0 +1,62 @@
+<!-- Hero Section -->
+<section class="hero min-h-[70vh] bg-base-200">
+    <div class="hero-content text-center">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold">{{ config.siteName }}</h1>
+            <p class="py-6 text-lg text-base-content/70">
+                {{ config.siteDescription }}. Build modern, responsive web applications
+                with our comprehensive Angular template featuring daisyUI components.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a routerLink="/auth/register" class="btn btn-primary btn-lg">Get Started</a>
+                <a routerLink="/admin" class="btn btn-outline btn-lg">View Demo</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 bg-base-100">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4">Everything You Need</h2>
+            <p class="text-base-content/70 max-w-xl mx-auto">
+                A complete UI template with all the components and patterns you need to build modern web applications.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            @for (feature of features; track feature.title) {
+            <div class="card bg-base-100 shadow-lg border border-base-200 hover:shadow-xl transition-shadow">
+                <div class="card-body items-center text-center">
+                    <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <div class="w-7 h-7 text-primary flex items-center justify-center font-bold">
+                            <!-- Simple icon fallback -->
+                            <span class="text-xl">★</span>
+                        </div>
+                    </div>
+                    <h3 class="card-title text-lg">{{ feature.title }}</h3>
+                    <p class="text-base-content/70 text-sm">{{ feature.description }}</p>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-primary text-primary-content">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+        <p class="text-primary-content/80 max-w-xl mx-auto mb-8">
+            Start building your next project with our comprehensive template. Free to use and customize.
+        </p>
+        <div class="flex justify-center gap-4">
+            <a routerLink="/auth/register" class="btn btn-secondary btn-lg">Create Account</a>
+            <a href="https://github.com" target="_blank"
+                class="btn btn-outline btn-lg border-primary-content text-primary-content hover:bg-primary-content hover:text-primary">
+                View on GitHub
+            </a>
+        </div>
+    </div>
+</section>

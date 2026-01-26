@@ -1,0 +1,29 @@
+<app-page-wrapper title="Analytics Overview">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        @for (metric of metrics(); track metric.title) {
+        <app-card>
+            <div class="stat p-0">
+                <div class="stat-title">{{ metric.title }}</div>
+                <div class="stat-value text-primary">{{ metric.value }}</div>
+                <div class="stat-desc" [class.text-success]="metric.type === 'success'"
+                    [class.text-warning]="metric.type === 'warning'">
+                    {{ metric.change }} vs last month
+                </div>
+            </div>
+        </app-card>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <app-card title="Traffic Overview">
+            <div class="h-64 flex items-center justify-center bg-base-200 rounded-lg">
+                <span class="text-base-content/50">Chart Placeholder</span>
+            </div>
+        </app-card>
+        <app-card title="Device Usage">
+            <div class="h-64 flex items-center justify-center bg-base-200 rounded-lg">
+                <span class="text-base-content/50">Chart Placeholder</span>
+            </div>
+        </app-card>
+    </div>
+</app-page-wrapper>

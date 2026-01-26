@@ -1,0 +1,47 @@
+<app-page-wrapper title="Users Management">
+    <div actions>
+        <app-button label="Add User" variant="primary" icon="plus" />
+    </div>
+
+    <app-card>
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (user of users(); track user.id) {
+                    <tr>
+                        <td>#{{ user.id }}</td>
+                        <td>
+                            <div class="font-bold">{{ user.name }}</div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>
+                            <div class="badge" [class.badge-primary]="user.status === 'Active'"
+                                [class.badge-ghost]="user.status === 'Inactive'"
+                                [class.badge-warning]="user.status === 'Pending'">
+                                {{ user.status }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn btn-ghost btn-xs">Edit</button>
+                                <button class="btn btn-ghost btn-xs text-error">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </app-card>
+</app-page-wrapper>

@@ -1,0 +1,64 @@
+<div class="container mx-auto py-8 px-4">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Settings</h1>
+
+        <div class="grid gap-6">
+            <!-- Appearance -->
+            <app-card title="Appearance" subtitle="Customize how the app looks">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">Theme</p>
+                        <p class="text-sm text-base-content/70">Toggle between light and dark mode</p>
+                    </div>
+                    <app-theme-toggle />
+                </div>
+            </app-card>
+
+            <!-- Notifications -->
+            <app-card title="Notifications" subtitle="Manage your notification preferences">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium">Email Notifications</p>
+                            <p class="text-sm text-base-content/70">Receive email updates about your account</p>
+                        </div>
+                        <input type="checkbox" class="toggle toggle-primary"
+                            [(ngModel)]="settings.emailNotifications" />
+                    </div>
+                    <div class="divider my-0"></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium">Push Notifications</p>
+                            <p class="text-sm text-base-content/70">Receive push notifications in your browser</p>
+                        </div>
+                        <input type="checkbox" class="toggle toggle-primary" [(ngModel)]="settings.pushNotifications" />
+                    </div>
+                    <div class="divider my-0"></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium">Marketing Emails</p>
+                            <p class="text-sm text-base-content/70">Receive emails about new features and offers</p>
+                        </div>
+                        <input type="checkbox" class="toggle toggle-primary" [(ngModel)]="settings.marketingEmails" />
+                    </div>
+                </div>
+            </app-card>
+
+            <!-- Security -->
+            <app-card title="Security" subtitle="Manage your security settings">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">Two-Factor Authentication</p>
+                        <p class="text-sm text-base-content/70">Add an extra layer of security to your account</p>
+                    </div>
+                    <input type="checkbox" class="toggle toggle-primary" [(ngModel)]="settings.twoFactorAuth" />
+                </div>
+            </app-card>
+
+            <!-- Save Button -->
+            <div class="flex justify-end">
+                <app-button label="Save Settings" (click)="saveSettings()" />
+            </div>
+        </div>
+    </div>
+</div>

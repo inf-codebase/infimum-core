@@ -1,0 +1,32 @@
+<app-page-wrapper title="System Settings">
+    <div class="max-w-2xl">
+        <app-card title="General Configuration">
+            <form class="flex flex-col gap-4" (ngSubmit)="saveSettings()">
+                <app-input label="Site Name" [(ngModel)]="siteConfig.name" name="siteName" />
+
+                <div class="divider"></div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-bold">Maintenance Mode</p>
+                        <p class="text-sm text-base-content/70">Disable access for non-admin users</p>
+                    </div>
+                    <app-checkbox [(ngModel)]="siteConfig.maintenanceMode" name="maintenance" inputId="maintenance" />
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-bold">Registration Open</p>
+                        <p class="text-sm text-base-content/70">Allow new users to sign up</p>
+                    </div>
+                    <app-checkbox [(ngModel)]="siteConfig.registrationOpen" name="registration"
+                        inputId="registration" />
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <app-button label="Save Changes" type="submit" variant="primary" />
+                </div>
+            </form>
+        </app-card>
+    </div>
+</app-page-wrapper>

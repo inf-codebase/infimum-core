@@ -1,0 +1,73 @@
+{
+    "siteName": "Infimum",
+    "siteDescription": "Modern Angular Dashboard Template",
+    "logo": "/assets/logo.svg",
+    "favicon": "/favicon.ico",
+    "defaultTheme": "rainypirate",
+    "features": {
+        "analytics": true,
+        "userManagement": true,
+        "contentManagement": true,
+        "darkModeToggle": true
+    },
+    "navigation": {
+        "public": [
+            {
+                "label": "Home",
+                "path": "/"
+            },
+            {
+                "label": "Features",
+                "path": "/features"
+            },
+            {
+                "label": "Pricing",
+                "path": "/pricing"
+            }
+        ],
+        "admin": [
+            {
+                "label": "Dashboard",
+                "path": "/admin/dashboard",
+                "icon": "home"
+            },
+            {
+                "label": "Users",
+                "path": "/admin/users",
+                "icon": "users"
+            },
+            {
+                "label": "Content",
+                "path": "/admin/content",
+                "icon": "file-text"
+            },
+            {
+                "label": "Analytics",
+                "path": "/admin/analytics",
+                "icon": "bar-chart"
+            },
+            {
+                "label": "Settings",
+                "path": "/admin/settings",
+                "icon": "settings"
+            }
+        ]
+    },
+    "footer": {
+        "copyright": "© 2024 Infimum Inc. All rights reserved.",
+        "links": [
+            {
+                "label": "Privacy",
+                "path": "/privacy"
+            },
+            {
+                "label": "Terms",
+                "path": "/terms"
+            }
+        ]
+    },
+    "social": {
+        "twitter": "https://twitter.com",
+        "github": "https://github.com"
+    }
+}
