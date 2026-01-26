@@ -1,0 +1,39 @@
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+    <div
+        class="grid grid-cols-1 md:grid-cols-2 w-full max-w-5xl bg-surface-0 dark:bg-surface-800 rounded-2xl shadow-lg border border-surface-200 dark:border-surface-700 overflow-hidden min-h-[600px]">
+
+        <!-- Left Side: Branding/Image -->
+        <div
+            class="hidden md:flex flex-col justify-between p-12 bg-primary-600 text-primary-50 relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-white blur-3xl"></div>
+                <div class="absolute -left-20 -bottom-20 w-96 h-96 rounded-full bg-white blur-3xl"></div>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-8">
+                    <i class="pi pi-box text-4xl"></i>
+                    <span class="font-bold text-3xl">Infimum</span>
+                </div>
+
+                <div class="space-y-6">
+                    <h1 class="text-4xl font-bold leading-tight">Build faster with our enterprise components.</h1>
+                    <p class="text-primary-100 text-lg">
+                        Access a complete suite of standard UI elements designed for modern web applications.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative z-10 text-primary-200 text-sm">
+                &copy; 2026 Infimum Inc.
+            </div>
+        </div>
+
+        <!-- Right Side: Form Content -->
+        <div class="flex flex-col justify-center p-8 md:p-12 bg-surface-0 dark:bg-surface-900">
+            <router-outlet />
+        </div>
+
+    </div>
+</div>

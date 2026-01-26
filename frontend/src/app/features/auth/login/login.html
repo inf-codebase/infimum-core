@@ -1,0 +1,49 @@
+<div class="w-full max-w-md mx-auto fade-in">
+    <div class="mb-8 text-center md:text-left">
+        <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">Welcome back</h2>
+        <p class="text-surface-600 dark:text-surface-400">Please enter your details to sign in.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+
+        @if (error()) {
+        <p-message severity="error" [text]="error()!" styleClass="w-full"></p-message>
+        }
+
+        <div class="flex flex-col gap-2">
+            <label for="email" class="font-medium text-surface-900 dark:text-surface-0">Email</label>
+            <input pInputText id="email" formControlName="email" placeholder="Enter your email" class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': form.get('email')?.touched && form.get('email')?.invalid}" />
+            @if (form.get('email')?.touched && form.get('email')?.errors?.['email']) {
+            <small class="text-red-500">Please enter a valid email address.</small>
+            }
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="password" class="font-medium text-surface-900 dark:text-surface-0">Password</label>
+            <p-password id="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                placeholder="••••••••" styleClass="w-full" inputStyleClass="w-full"></p-password>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <p-checkbox formControlName="rememberMe" [binary]="true" inputId="remember"></p-checkbox>
+                <label for="remember" class="text-surface-600 dark:text-surface-400 cursor-pointer select-none">Remember
+                    me</label>
+            </div>
+            <a routerLink="/auth/forgot-password"
+                class="text-primary-600 hover:text-primary-700 font-medium text-sm no-underline hover:underline cursor-pointer">Forgot
+                password?</a>
+        </div>
+
+        <p-button type="submit" label="Sign In" [loading]="isLoading()" [disabled]="form.invalid"
+            styleClass="w-full"></p-button>
+
+        <div class="mt-6 text-center text-surface-600 dark:text-surface-400">
+            Don't have an account?
+            <a routerLink="/auth/register"
+                class="text-primary-600 hover:text-primary-700 font-medium no-underline hover:underline cursor-pointer">Sign
+                up</a>
+        </div>
+    </form>
+</div>

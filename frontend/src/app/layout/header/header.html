@@ -1,0 +1,22 @@
+<div
+    class="h-16 px-4 bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between transition-colors duration-300">
+    <div class="flex items-center gap-3">
+        <p-button icon="pi pi-bars" [text]="true" [rounded]="true" severity="secondary" (onClick)="toggleSidebar.emit()"
+            class="block md:hidden" />
+        <div class="flex items-center gap-2">
+            <i class="pi pi-box text-2xl text-primary-500"></i>
+            <span class="font-bold text-xl text-surface-900 dark:text-surface-0">Infimum</span>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <app-theme-toggle />
+        <div class="w-px h-6 bg-surface-200 dark:bg-surface-700 mx-1"></div>
+        <div
+            class="flex items-center gap-3 cursor-pointer p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
+            <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" shape="circle"
+                styleClass="w-8 h-8" />
+            <span class="hidden md:block font-medium text-sm text-surface-700 dark:text-surface-200">Admin User</span>
+        </div>
+    </div>
+</div>

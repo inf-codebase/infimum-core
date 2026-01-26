@@ -1,0 +1,68 @@
+<div class="min-h-screen flex flex-col bg-surface-0 dark:bg-surface-950">
+    <!-- Sticky Header -->
+    <header
+        class="sticky top-0 z-50 bg-surface-0/80 dark:bg-surface-950/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-700">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-box text-2xl text-primary-500"></i>
+                <span class="font-bold text-xl text-surface-900 dark:text-surface-0">Infimum</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a routerLink="/"
+                    class="text-surface-600 dark:text-surface-400 hover:text-primary-500 transition-colors cursor-pointer">Home</a>
+                <a routerLink="/features"
+                    class="text-surface-600 dark:text-surface-400 hover:text-primary-500 transition-colors cursor-pointer">Features</a>
+                <a routerLink="/pricing"
+                    class="text-surface-600 dark:text-surface-400 hover:text-primary-500 transition-colors cursor-pointer">Pricing</a>
+                <p-button label="Sign In" icon="pi pi-user" rounded="true" size="small"></p-button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        <router-outlet />
+    </main>
+
+    <!-- Large Footer -->
+    <footer class="bg-surface-900 text-surface-0 py-12">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="pi pi-box text-2xl text-primary-500"></i>
+                    <span class="font-bold text-xl">Infimum</span>
+                </div>
+                <p class="text-surface-400 text-sm leading-relaxed">
+                    Building the future of web applications with modern technologies and best practices.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Product</h4>
+                <ul class="space-y-2 text-surface-400 text-sm">
+                    <li class="hover:text-primary-500 cursor-pointer">Features</li>
+                    <li class="hover:text-primary-500 cursor-pointer">Integrations</li>
+                    <li class="hover:text-primary-500 cursor-pointer">Documentation</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Company</h4>
+                <ul class="space-y-2 text-surface-400 text-sm">
+                    <li class="hover:text-primary-500 cursor-pointer">About Us</li>
+                    <li class="hover:text-primary-500 cursor-pointer">Careers</li>
+                    <li class="hover:text-primary-500 cursor-pointer">Contact</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">Legal</h4>
+                <ul class="space-y-2 text-surface-400 text-sm">
+                    <li class="hover:text-primary-500 cursor-pointer">Privacy Policy</li>
+                    <li class="hover:text-primary-500 cursor-pointer">Terms of Service</li>
+                </ul>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 mt-8 pt-8 border-t border-surface-800 text-center text-surface-500 text-sm">
+            &copy; 2026 Infimum. All rights reserved.
+        </div>
+    </footer>
+</div>

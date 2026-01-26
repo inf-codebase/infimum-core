@@ -1,0 +1,13 @@
+<div
+    class="h-full bg-surface-0 dark:bg-surface-900 border-r border-surface-200 dark:border-surface-700 flex flex-col transition-all duration-300">
+    <div class="flex-1 overflow-y-auto py-2">
+        <p-menu [model]="items" styleClass="w-full border-none" />
+    </div>
+
+    <div class="p-4 border-t border-surface-200 dark:border-surface-700">
+        <div class="flex items-center gap-2 text-surface-500 dark:text-surface-400 text-sm">
+            <i class="pi pi-question-circle"></i>
+            <span *ngIf="!isCollapsed()" class="animate-fade-in">Help Center</span>
+        </div>
+    </div>
+</div>

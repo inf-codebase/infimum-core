@@ -1,0 +1,56 @@
+<div class="w-full max-w-md mx-auto fade-in">
+    <div class="mb-8 text-center md:text-left">
+        <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">Create an account</h2>
+        <p class="text-surface-600 dark:text-surface-400">Start your journey with us today.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+
+        <div class="flex flex-col gap-2">
+            <label for="name" class="font-medium text-surface-900 dark:text-surface-0">Full Name</label>
+            <input pInputText id="name" formControlName="name" placeholder="John Doe" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="email" class="font-medium text-surface-900 dark:text-surface-0">Email</label>
+            <input pInputText id="email" formControlName="email" placeholder="john@example.com" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="password" class="font-medium text-surface-900 dark:text-surface-0">Password</label>
+            <p-password id="password" formControlName="password" [toggleMask]="true" placeholder="••••••••"
+                styleClass="w-full" inputStyleClass="w-full">
+                <ng-template pTemplate="header">
+                    <h6>Pick a password</h6>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                    <p class="mt-2">Suggestions</p>
+                    <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                        <li>At least one lowercase</li>
+                        <li>At least one uppercase</li>
+                        <li>At least one numeric</li>
+                        <li>Minimum 6 characters</li>
+                    </ul>
+                </ng-template>
+            </p-password>
+        </div>
+
+        <div class="flex items-start gap-2">
+            <p-checkbox formControlName="acceptTerms" [binary]="true" inputId="terms"></p-checkbox>
+            <label for="terms" class="text-surface-600 dark:text-surface-400 text-sm leading-tight cursor-pointer">
+                I agree to the <a href="#" class="text-primary-600 hover:underline">Terms of Service</a> and <a href="#"
+                    class="text-primary-600 hover:underline">Privacy Policy</a>
+            </label>
+        </div>
+
+        <p-button type="submit" label="Create account" [loading]="isLoading()" [disabled]="form.invalid"
+            styleClass="w-full"></p-button>
+
+        <div class="mt-6 text-center text-surface-600 dark:text-surface-400">
+            Already have an account?
+            <a routerLink="/auth/login"
+                class="text-primary-600 hover:text-primary-700 font-medium no-underline hover:underline cursor-pointer">Sign
+                in</a>
+        </div>
+    </form>
+</div>
