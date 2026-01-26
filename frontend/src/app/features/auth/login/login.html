@@ -1,14 +1,19 @@
 <div class="w-full mx-auto fade-in" style="max-width: 28rem">
     <div class="text-center mb-5">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Welcome Back</h2>
-        <p class="text-gray-600 dark:text-gray-400 m-0">Sign in to continue to Infimum</p>
+        <h2 class="text-3xl font-bold text-base-content mb-2">Welcome Back</h2>
+        <p class="text-base-content/70 m-0">Sign in to continue to Infimum</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
 
         @if (error()) {
-        <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm">
-            {{ error() }}
+        <div role="alert" class="alert alert-error text-sm py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ error() }}</span>
         </div>
         }
 
@@ -22,7 +27,7 @@
             <app-checkbox label="Remember me" formControlName="rememberMe"></app-checkbox>
 
             <a routerLink="/auth/forgot-password"
-                class="text-sm font-medium text-primary hover:text-primary-600 no-underline cursor-pointer transition-colors">
+                class="link link-primary text-sm no-underline hover:underline cursor-pointer">
                 Forgot password?
             </a>
         </div>
@@ -31,8 +36,9 @@
             [disabled]="form.invalid"></app-button>
 
         <div class="text-center mt-2">
-            <span class="text-gray-600 dark:text-gray-400">Don't have an account?</span>
-            <a routerLink="/auth/register" class="font-bold text-primary hover:underline ml-2 cursor-pointer">Sign
+            <span class="text-base-content/70">Don't have an account?</span>
+            <a routerLink="/auth/register"
+                class="link link-primary font-bold ml-2 cursor-pointer no-underline hover:underline">Sign
                 up</a>
         </div>
     </form>

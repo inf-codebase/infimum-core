@@ -1,9 +1,7 @@
-<header
-    class="h-16 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+<header class="navbar bg-base-100 border-b border-base-200">
     <!-- Left: Sidebar Toggle -->
-    <div class="flex items-center">
-        <button (click)="toggleSidebar.emit()"
-            class="p-2 rounded-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none transition-colors">
+    <div class="flex-none">
+        <button (click)="toggleSidebar.emit()" class="btn btn-square btn-ghost">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -11,43 +9,40 @@
     </div>
 
     <!-- Right: User Menu & Actions -->
-    <div class="flex items-center gap-2 md:gap-3">
-        <!-- Notifications (Hidden on small screens) -->
-        <button
-            class="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none transition-colors hidden md:inline-flex">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
+    <div class="flex-1 justify-end gap-2">
+        <!-- Notifications -->
+        <button class="btn btn-ghost btn-circle hidden md:inline-flex">
+            <div class="indicator">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span class="badge badge-xs badge-primary indicator-item"></span>
+            </div>
         </button>
 
-        <!-- User Profile (Static for now, dropdown logic requires TS) -->
-        <div class="relative group">
-            <div
-                class="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-700 cursor-pointer p-2 rounded transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="avatar"
-                    class="w-8 h-8 rounded-full" />
-                <div class="hidden md:flex flex-col text-left">
-                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100">Admin User</span>
-                    <span class="text-xs text-gray-600 dark:text-gray-400">Administrator</span>
+        <!-- User Dropdown -->
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost flex items-center gap-2 px-2">
+                <div class="avatar">
+                    <div class="w-8 rounded-full">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="avatar" />
+                    </div>
                 </div>
-                <svg class="w-4 h-4 text-gray-500 hidden md:block" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+                <div class="hidden md:flex flex-col text-left text-xs">
+                    <span class="font-bold">Admin User</span>
+                    <span class="opacity-70">Administrator</span>
+                </div>
+                <svg class="w-4 h-4 opacity-50 hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </div>
-            <!-- Simple Dropdown Content (Hover or Focus based for simplicity without TS signals yet) -->
-            <div
-                class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
-                <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
-                <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
-                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                <a routerLink="/auth/login"
-                    class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10">Sign
-                    out</a>
-            </div>
+            <ul tabindex="0"
+                class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                <li><a>Profile</a></li>
+                <li><a>Settings</a></li>
+                <li><a routerLink="/auth/login" class="text-error">Sign out</a></li>
+            </ul>
         </div>
     </div>
 </header>

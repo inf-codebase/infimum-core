@@ -1,105 +1,91 @@
 <app-page-wrapper title="Dashboard">
   <div actions>
-    <button
-      type="button"
-      class="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-      (click)="refresh()"
-    >
+    <button type="button" class="btn btn-sm btn-outline" (click)="refresh()">
       <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0114-7.5L20 10M4 14l1 1a9 9 0 0014 1.5L20 14"
-        />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0114-7.5L20 10M4 14l1 1a9 9 0 0014 1.5L20 14" />
       </svg>
       Refresh
     </button>
   </div>
 
   @if (isLoading()) {
-    <app-loading-skeleton />
+  <app-loading-skeleton />
   } @else {
-    <div class="grid grid-cols-12 gap-6">
-      @for (stat of stats(); track stat.title) {
-        <div class="col-span-12 md:col-span-6 lg:col-span-3">
-          <app-card>
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">{{ stat.title }}</div>
-                <div class="text-gray-900 dark:text-gray-100 text-2xl font-bold mt-1">{{ stat.value }}</div>
-              </div>
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                <svg class="w-6 h-6 text-gray-700 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 3v18h18M7 14l3-3 3 3 6-6"
-                  />
-                </svg>
-              </div>
+  <div class="grid grid-cols-12 gap-6">
+    @for (stat of stats(); track stat.title) {
+    <div class="col-span-12 md:col-span-6 lg:col-span-3">
+      <app-card>
+        <div class="stat p-0">
+          <div class="stat-figure text-secondary">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-base-200 text-base-content">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 14l3-3 3 3 6-6" />
+              </svg>
             </div>
-            <div class="mt-3 text-sm">
-              <span [class]="stat.color + ' font-medium'">{{ stat.trend }}</span>
-              <span class="text-gray-500 dark:text-gray-400 ml-1">since last week</span>
-            </div>
-          </app-card>
+          </div>
+          <div class="stat-title">{{ stat.title }}</div>
+          <div class="stat-value text-2xl">{{ stat.value }}</div>
+          <div class="stat-desc flex items-center gap-1">
+            <span [class]="stat.color + ' font-medium'">{{ stat.trend }}</span>
+            <span>since last week</span>
+          </div>
         </div>
-      }
-
-      <div class="col-span-12 lg:col-span-6">
-        <app-card title="Revenue Overview" subtitle="Last 30 days">
-          <div
-            class="h-[300px] flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded border border-dashed border-gray-300 dark:border-gray-600"
-          >
-            <span class="text-gray-500 dark:text-gray-400">Chart Placeholder</span>
-          </div>
-        </app-card>
-      </div>
-
-      <div class="col-span-12 lg:col-span-6">
-        <app-card title="Recent Transactions">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th class="p-3">ID</th>
-                  <th class="p-3">Customer</th>
-                  <th class="p-3">Amount</th>
-                  <th class="p-3">Status</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                <tr>
-                  <td class="p-3">#1234</td>
-                  <td class="p-3">John Doe</td>
-                  <td class="p-3">$120.00</td>
-                  <td class="p-3">
-                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Completed</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="p-3">#1235</td>
-                  <td class="p-3">Jane Smith</td>
-                  <td class="p-3">$85.00</td>
-                  <td class="p-3">
-                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">Pending</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="p-3">#1236</td>
-                  <td class="p-3">Bob Johnson</td>
-                  <td class="p-3">$245.00</td>
-                  <td class="p-3">
-                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Completed</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </app-card>
-      </div>
+      </app-card>
     </div>
+    }
+
+    <div class="col-span-12 lg:col-span-6">
+      <app-card title="Revenue Overview" subtitle="Last 30 days">
+        <div
+          class="h-[300px] flex items-center justify-center bg-base-200/50 rounded border border-dashed border-base-300">
+          <span class="text-base-content/50">Chart Placeholder</span>
+        </div>
+      </app-card>
+    </div>
+
+    <div class="col-span-12 lg:col-span-6">
+      <app-card title="Recent Transactions">
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#1234</td>
+                <td>John Doe</td>
+                <td>$120.00</td>
+                <td>
+                  <span class="badge badge-success badge-sm">Completed</span>
+                </td>
+              </tr>
+              <tr>
+                <td>#1235</td>
+                <td>Jane Smith</td>
+                <td>$85.00</td>
+                <td>
+                  <span class="badge badge-warning badge-sm">Pending</span>
+                </td>
+              </tr>
+              <tr>
+                <td>#1236</td>
+                <td>Bob Johnson</td>
+                <td>$245.00</td>
+                <td>
+                  <span class="badge badge-success badge-sm">Completed</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </app-card>
+    </div>
+  </div>
   }
 </app-page-wrapper>

@@ -1,59 +1,39 @@
 <div class="w-full mx-auto fade-in" style="max-width: 28rem">
   <div class="text-center mb-6">
-    <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Create Account</h2>
-    <p class="text-gray-600 dark:text-gray-400 m-0">Join us to start your journey</p>
+    <h2 class="text-3xl font-bold text-base-content mb-2">Create Account</h2>
+    <p class="text-base-content/70 m-0">Join us to start your journey</p>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-    <app-input
-      label="Name"
-      formControlName="name"
-      placeholder="Enter your name"
-      [error]="
+    <app-input label="Name" formControlName="name" placeholder="Enter your name" [error]="
         form.get('name')?.touched && form.get('name')?.invalid ? 'Please enter your name' : ''
-      "
-    />
+      " />
 
-    <app-input
-      label="Email"
-      formControlName="email"
-      placeholder="Enter your email"
-      [error]="
+    <app-input label="Email" formControlName="email" placeholder="Enter your email" [error]="
         form.get('email')?.touched && form.get('email')?.invalid ? 'Please enter a valid email' : ''
-      "
-    />
+      " />
 
-    <app-input
-      label="Password"
-      type="password"
-      formControlName="password"
-      placeholder="Create a password"
-      [error]="
+    <app-input label="Password" type="password" formControlName="password" placeholder="Create a password" [error]="
         form.get('password')?.touched && form.get('password')?.invalid ? 'Password must be at least 6 characters' : ''
-      "
-    />
+      " />
 
     <div class="flex items-start gap-3">
       <app-checkbox formControlName="acceptTerms" inputId="acceptTerms" />
-      <label for="acceptTerms" class="text-sm text-gray-600 dark:text-gray-400 leading-snug">
+      <label for="acceptTerms" class="text-sm text-base-content/70 leading-snug">
         I agree to the
-        <a href="#" class="font-bold text-primary hover:underline">Terms of Service</a>
+        <a href="#" class="link link-primary font-bold">Terms of Service</a>
         and
-        <a href="#" class="font-bold text-primary hover:underline">Privacy Policy</a>
+        <a href="#" class="link link-primary font-bold">Privacy Policy</a>
       </label>
     </div>
 
-    <app-button
-      label="Create account"
-      type="submit"
-      [loading]="isLoading()"
-      [disabled]="form.invalid"
-      [fullWidth]="true"
-    />
+    <app-button label="Create account" type="submit" [loading]="isLoading()" [disabled]="form.invalid"
+      [fullWidth]="true" />
 
-    <div class="mt-2 text-center text-gray-600 dark:text-gray-300 font-medium">
+    <div class="mt-2 text-center text-base-content/70 font-medium">
       Already have an account?
-      <a routerLink="/auth/login" class="text-primary font-bold no-underline hover:underline cursor-pointer">Sign in</a>
+      <a routerLink="/auth/login"
+        class="link link-primary font-bold ml-2 no-underline hover:underline cursor-pointer">Sign in</a>
     </div>
   </form>
 </div>

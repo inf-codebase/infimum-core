@@ -1,14 +1,14 @@
-<div class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-    <div class="grid grid-cols-12 w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px] m-0"
+<div class="flex min-h-screen items-center justify-center bg-base-200 p-4">
+    <div class="grid grid-cols-12 w-full bg-base-100 rounded-2xl shadow-xl border border-base-200 overflow-hidden min-h-[600px] m-0"
         style="max-width: 1000px">
 
         <!-- Left Side: Image/Branding -->
         <div
-            class="hidden md:flex md:col-span-6 flex-col justify-between p-6 bg-primary text-white relative overflow-hidden">
+            class="hidden md:flex md:col-span-6 flex-col justify-between p-6 bg-primary text-primary-content relative overflow-hidden">
             <!-- Background Decoration -->
             <div class="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                 <!-- Chart Line SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="absolute text-white w-64 h-64"
+                <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-64 h-64"
                     style="top: -10%; left: -10%; transform: rotate(-15deg)" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
@@ -16,7 +16,7 @@
                 </svg>
 
                 <!-- Shield SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="absolute text-white w-64 h-64"
+                <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-64 h-64"
                     style="bottom: -10%; right: -10%; transform: rotate(15deg)" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Right Side: Content (Router Outlet) -->
-        <div class="col-span-12 md:col-span-6 flex flex-col justify-center p-5 md:p-7 bg-white dark:bg-gray-800">
+        <div class="col-span-12 md:col-span-6 flex flex-col justify-center p-5 md:p-7 bg-base-100">
             <router-outlet></router-outlet>
         </div>
     </div>

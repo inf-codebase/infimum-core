@@ -13,9 +13,7 @@ export class ThemeToggle {
 
   toggleTheme() {
     this.isDarkMode.update(v => !v);
-    const element = document.querySelector('html');
-    if (element) {
-      element.classList.toggle('dark-mode');
-    }
+    const theme = this.isDarkMode() ? 'forest' : 'rainypirate';
+    document.documentElement.setAttribute('data-theme', theme);
   }
 }

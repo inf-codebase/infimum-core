@@ -1,61 +1,78 @@
 ﻿@import "tailwindcss";
 @plugin "daisyui";
 
-@theme {
-    /* Semantic Colors aligned with variables */
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-
-    --color-surface: var(--surface);
-    --color-surface-foreground: var(--surface-foreground);
-    --color-surface-dim: var(--surface-dim);
-    --color-surface-border: var(--surface-border);
+@plugin "daisyui/theme" {
+    name: "rainypirate";
+    default: true;
+    prefersdark: false;
+    color-scheme: "light";
+    --color-base-100: oklch(98% 0.003 247.858);
+    --color-base-200: oklch(98% 0.002 247.839);
+    --color-base-300: oklch(87% 0.01 258.338);
+    --color-base-content: oklch(20% 0 0);
+    --color-primary: oklch(76% 0.177 163.223);
+    --color-primary-content: oklch(26% 0.065 152.934);
+    --color-secondary: oklch(70% 0.165 254.624);
+    --color-secondary-content: oklch(28% 0.091 267.935);
+    --color-accent: oklch(0% 0 0);
+    --color-accent-content: oklch(100% 0 0);
+    --color-neutral: oklch(20% 0 0);
+    --color-neutral-content: oklch(98% 0 0);
+    --color-info: oklch(60% 0.126 221.723);
+    --color-info-content: oklch(98% 0.019 200.873);
+    --color-success: oklch(60% 0.118 184.704);
+    --color-success-content: oklch(98% 0.014 180.72);
+    --color-warning: oklch(68% 0.162 75.834);
+    --color-warning-content: oklch(98% 0.026 102.212);
+    --color-error: oklch(58% 0.253 17.585);
+    --color-error-content: oklch(96% 0.015 12.422);
+    --radius-selector: 2rem;
+    --radius-field: 2rem;
+    --radius-box: 2rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 0.5px;
+    --depth: 1;
+    --noise: 1;
 }
 
-/* 
- * Design System Variables 
- * Using HSL for easier opacity modifiers if needed, 
- * but hex for simplicity in this initial setup.
- */
-:root {
-    /* Primary (Blue-600) */
-    --primary: #2563eb;
-    --primary-foreground: #ffffff;
-
-    /* Surface (White) */
-    --surface: #ffffff;
-    --surface-dim: #f8fafc;
-    /* Slate-50 */
-    --surface-border: #e2e8f0;
-    /* Slate-200 */
-    --surface-foreground: #0f172a;
-    /* Slate-900 */
+@plugin "daisyui/theme" {
+    name: "forest";
+    default: false;
+    prefersdark: true;
+    color-scheme: "dark";
+    --color-base-100: oklch(13% 0.028 261.692);
+    --color-base-200: oklch(21% 0.034 264.665);
+    --color-base-300: oklch(27% 0.033 256.848);
+    --color-base-content: oklch(96% 0.003 264.542);
+    --color-primary: oklch(63% 0.237 25.331);
+    --color-primary-content: oklch(97% 0.013 17.38);
+    --color-secondary: oklch(58% 0.233 277.117);
+    --color-secondary-content: oklch(96% 0.018 272.314);
+    --color-accent: oklch(69% 0.17 162.48);
+    --color-accent-content: oklch(97% 0.021 166.113);
+    --color-neutral: oklch(21% 0.034 264.665);
+    --color-neutral-content: oklch(98% 0.002 247.839);
+    --color-info: oklch(70% 0.165 254.624);
+    --color-info-content: oklch(28% 0.091 267.935);
+    --color-success: oklch(79% 0.209 151.711);
+    --color-success-content: oklch(26% 0.065 152.934);
+    --color-warning: oklch(82% 0.189 84.429);
+    --color-warning-content: oklch(27% 0.077 45.635);
+    --color-error: oklch(70% 0.191 22.216);
+    --color-error-content: oklch(25% 0.092 26.042);
+    --radius-selector: 2rem;
+    --radius-field: 2rem;
+    --radius-box: 2rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 1;
 }
 
-/* Dark Mode (Class based or System preference - using media for now for auto) */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Primary (Blue-500) */
-        --primary: #3b82f6;
-        --primary-foreground: #0f172a;
-
-        /* Surface (Slate-900) */
-        --surface: #0f172a;
-        --surface-dim: #1e293b;
-        /* Slate-800 */
-        --surface-border: #334155;
-        /* Slate-700 */
-        --surface-foreground: #f8fafc;
-        /* Slate-50 */
-    }
-}
-
-/* Global Reset overrides if needed */
 body {
-    background-color: var(--surface-dim);
-    color: var(--surface-foreground);
     font-family: 'Inter', sans-serif;
-    /* Ensure font is available or fallback */
 }
 
 @keyframes slide-in-right {

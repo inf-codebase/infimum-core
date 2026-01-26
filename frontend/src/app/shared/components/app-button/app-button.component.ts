@@ -23,29 +23,29 @@ export class AppButton {
     @Output() onClick = new EventEmitter<Event>();
 
     get baseClasses(): string {
-        return 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+        return 'btn';
     }
 
     get sizeClasses(): string {
         switch (this.size) {
-            case 'sm': return 'px-3 py-1.5 text-sm rounded-md';
-            case 'lg': return 'px-6 py-3 text-lg rounded-lg';
-            default: return 'px-4 py-2 text-sm rounded-lg';
+            case 'sm': return 'btn-sm';
+            case 'lg': return 'btn-lg';
+            default: return 'btn-md';
         }
     }
 
     get variantClasses(): string {
         switch (this.variant) {
             case 'secondary':
-                return 'bg-surface-dim text-surface-foreground hover:bg-surface-border focus:ring-surface-border';
+                return 'btn-secondary';
             case 'outline':
-                return 'border border-surface-border text-surface-foreground hover:bg-surface-dim focus:ring-surface-border';
+                return 'btn-outline';
             case 'ghost':
-                return 'text-surface-foreground hover:bg-surface-dim focus:ring-surface-border';
+                return 'btn-ghost';
             case 'danger':
-                return 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500';
+                return 'btn-error';
             default: // primary
-                return 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm focus:ring-primary';
+                return 'btn-primary';
         }
     }
 
