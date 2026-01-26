@@ -2,9 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { InputOtpModule } from 'primeng/inputotp';
-import { AuthService } from '../../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth';
+import { AppInput } from '../../../shared/components/app-input/app-input.component';
+import { AppButton } from '../../../shared/components/app-button/app-button.component';
 
 @Component({
   selector: 'app-otp-verification',
@@ -12,8 +12,8 @@ import { AuthService } from '../../../../core/services/auth';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ButtonModule,
-    InputOtpModule
+    AppInput,
+    AppButton
   ],
   templateUrl: './otp-verification.html',
   styleUrl: './otp-verification.css',

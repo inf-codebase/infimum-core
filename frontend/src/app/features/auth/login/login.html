@@ -1,48 +1,38 @@
-<div class="w-full max-w-md mx-auto fade-in">
-    <div class="mb-8 text-center md:text-left">
-        <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">Welcome back</h2>
-        <p class="text-surface-600 dark:text-surface-400">Please enter your details to sign in.</p>
+<div class="w-full mx-auto fade-in" style="max-width: 28rem">
+    <div class="text-center mb-5">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Welcome Back</h2>
+        <p class="text-gray-600 dark:text-gray-400 m-0">Sign in to continue to Infimum</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
 
         @if (error()) {
-        <p-message severity="error" [text]="error()!" styleClass="w-full"></p-message>
+        <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm">
+            {{ error() }}
+        </div>
         }
 
-        <div class="flex flex-col gap-2">
-            <label for="email" class="font-medium text-surface-900 dark:text-surface-0">Email</label>
-            <input pInputText id="email" formControlName="email" placeholder="Enter your email" class="w-full"
-                [ngClass]="{'ng-invalid ng-dirty': form.get('email')?.touched && form.get('email')?.invalid}" />
-            @if (form.get('email')?.touched && form.get('email')?.errors?.['email']) {
-            <small class="text-red-500">Please enter a valid email address.</small>
-            }
-        </div>
+        <app-input label="Email" formControlName="email" placeholder="Enter your email"
+            [error]="(form.get('email')?.touched && form.get('email')?.invalid) ? 'Please enter a valid email' : ''"></app-input>
 
-        <div class="flex flex-col gap-2">
-            <label for="password" class="font-medium text-surface-900 dark:text-surface-0">Password</label>
-            <p-password id="password" formControlName="password" [feedback]="false" [toggleMask]="true"
-                placeholder="••••••••" styleClass="w-full" inputStyleClass="w-full"></p-password>
-        </div>
+        <app-input label="Password" type="password" formControlName="password" placeholder="••••••••"
+            [error]="(form.get('password')?.touched && form.get('password')?.invalid) ? 'Password is required' : ''"></app-input>
 
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <p-checkbox formControlName="rememberMe" [binary]="true" inputId="remember"></p-checkbox>
-                <label for="remember" class="text-surface-600 dark:text-surface-400 cursor-pointer select-none">Remember
-                    me</label>
-            </div>
+            <app-checkbox label="Remember me" formControlName="rememberMe"></app-checkbox>
+
             <a routerLink="/auth/forgot-password"
-                class="text-primary-600 hover:text-primary-700 font-medium text-sm no-underline hover:underline cursor-pointer">Forgot
-                password?</a>
+                class="text-sm font-medium text-primary hover:text-primary-600 no-underline cursor-pointer transition-colors">
+                Forgot password?
+            </a>
         </div>
 
-        <p-button type="submit" label="Sign In" [loading]="isLoading()" [disabled]="form.invalid"
-            styleClass="w-full"></p-button>
+        <app-button label="Sign In" type="submit" [loading]="isLoading()" [fullWidth]="true"
+            [disabled]="form.invalid"></app-button>
 
-        <div class="mt-6 text-center text-surface-600 dark:text-surface-400">
-            Don't have an account?
-            <a routerLink="/auth/register"
-                class="text-primary-600 hover:text-primary-700 font-medium no-underline hover:underline cursor-pointer">Sign
+        <div class="text-center mt-2">
+            <span class="text-gray-600 dark:text-gray-400">Don't have an account?</span>
+            <a routerLink="/auth/register" class="font-bold text-primary hover:underline ml-2 cursor-pointer">Sign
                 up</a>
         </div>
     </form>

@@ -1,6 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 import { PageWrapper } from '../../../../shared/components/page-wrapper/page-wrapper';
 import { Card } from '../../../../shared/components/card/card';
 import { LoadingSkeleton } from '../../../../shared/components/loading-skeleton/loading-skeleton';
@@ -8,7 +7,8 @@ import { LoadingSkeleton } from '../../../../shared/components/loading-skeleton/
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, ButtonModule, PageWrapper, Card, LoadingSkeleton],
+
+  imports: [CommonModule, PageWrapper, Card, LoadingSkeleton],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.css',
 })

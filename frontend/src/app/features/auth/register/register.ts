@@ -2,11 +2,10 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../../../core/services/auth';
+import { AuthService } from '../../../core/services/auth';
+import { AppInput } from '../../../shared/components/app-input/app-input.component';
+import { AppButton } from '../../../shared/components/app-button/app-button.component';
+import { AppCheckbox } from '../../../shared/components/app-checkbox/app-checkbox.component';
 
 @Component({
   selector: 'app-register',
@@ -15,10 +14,9 @@ import { AuthService } from '../../../../core/services/auth';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    InputTextModule,
-    PasswordModule,
-    CheckboxModule,
-    ButtonModule
+    AppInput,
+    AppButton,
+    AppCheckbox
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',

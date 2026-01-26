@@ -2,8 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
+import { AppInput } from '../../../shared/components/app-input/app-input.component';
+import { AppButton } from '../../../shared/components/app-button/app-button.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -12,8 +12,8 @@ import { ButtonModule } from 'primeng/button';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    InputTextModule,
-    ButtonModule
+    AppInput,
+    AppButton
   ],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',

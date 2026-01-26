@@ -1,56 +1,59 @@
-<div class="w-full max-w-md mx-auto fade-in">
-    <div class="mb-8 text-center md:text-left">
-        <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">Create an account</h2>
-        <p class="text-surface-600 dark:text-surface-400">Start your journey with us today.</p>
+<div class="w-full mx-auto fade-in" style="max-width: 28rem">
+  <div class="text-center mb-6">
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Create Account</h2>
+    <p class="text-gray-600 dark:text-gray-400 m-0">Join us to start your journey</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <app-input
+      label="Name"
+      formControlName="name"
+      placeholder="Enter your name"
+      [error]="
+        form.get('name')?.touched && form.get('name')?.invalid ? 'Please enter your name' : ''
+      "
+    />
+
+    <app-input
+      label="Email"
+      formControlName="email"
+      placeholder="Enter your email"
+      [error]="
+        form.get('email')?.touched && form.get('email')?.invalid ? 'Please enter a valid email' : ''
+      "
+    />
+
+    <app-input
+      label="Password"
+      type="password"
+      formControlName="password"
+      placeholder="Create a password"
+      [error]="
+        form.get('password')?.touched && form.get('password')?.invalid ? 'Password must be at least 6 characters' : ''
+      "
+    />
+
+    <div class="flex items-start gap-3">
+      <app-checkbox formControlName="acceptTerms" inputId="acceptTerms" />
+      <label for="acceptTerms" class="text-sm text-gray-600 dark:text-gray-400 leading-snug">
+        I agree to the
+        <a href="#" class="font-bold text-primary hover:underline">Terms of Service</a>
+        and
+        <a href="#" class="font-bold text-primary hover:underline">Privacy Policy</a>
+      </label>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+    <app-button
+      label="Create account"
+      type="submit"
+      [loading]="isLoading()"
+      [disabled]="form.invalid"
+      [fullWidth]="true"
+    />
 
-        <div class="flex flex-col gap-2">
-            <label for="name" class="font-medium text-surface-900 dark:text-surface-0">Full Name</label>
-            <input pInputText id="name" formControlName="name" placeholder="John Doe" class="w-full" />
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <label for="email" class="font-medium text-surface-900 dark:text-surface-0">Email</label>
-            <input pInputText id="email" formControlName="email" placeholder="john@example.com" class="w-full" />
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <label for="password" class="font-medium text-surface-900 dark:text-surface-0">Password</label>
-            <p-password id="password" formControlName="password" [toggleMask]="true" placeholder="••••••••"
-                styleClass="w-full" inputStyleClass="w-full">
-                <ng-template pTemplate="header">
-                    <h6>Pick a password</h6>
-                </ng-template>
-                <ng-template pTemplate="footer">
-                    <p class="mt-2">Suggestions</p>
-                    <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
-                        <li>At least one lowercase</li>
-                        <li>At least one uppercase</li>
-                        <li>At least one numeric</li>
-                        <li>Minimum 6 characters</li>
-                    </ul>
-                </ng-template>
-            </p-password>
-        </div>
-
-        <div class="flex items-start gap-2">
-            <p-checkbox formControlName="acceptTerms" [binary]="true" inputId="terms"></p-checkbox>
-            <label for="terms" class="text-surface-600 dark:text-surface-400 text-sm leading-tight cursor-pointer">
-                I agree to the <a href="#" class="text-primary-600 hover:underline">Terms of Service</a> and <a href="#"
-                    class="text-primary-600 hover:underline">Privacy Policy</a>
-            </label>
-        </div>
-
-        <p-button type="submit" label="Create account" [loading]="isLoading()" [disabled]="form.invalid"
-            styleClass="w-full"></p-button>
-
-        <div class="mt-6 text-center text-surface-600 dark:text-surface-400">
-            Already have an account?
-            <a routerLink="/auth/login"
-                class="text-primary-600 hover:text-primary-700 font-medium no-underline hover:underline cursor-pointer">Sign
-                in</a>
-        </div>
-    </form>
+    <div class="mt-2 text-center text-gray-600 dark:text-gray-300 font-medium">
+      Already have an account?
+      <a routerLink="/auth/login" class="text-primary font-bold no-underline hover:underline cursor-pointer">Sign in</a>
+    </div>
+  </form>
 </div>

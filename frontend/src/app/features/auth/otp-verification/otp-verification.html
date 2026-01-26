@@ -1,35 +1,33 @@
-<div class="w-full max-w-md mx-auto fade-in text-center">
-    <div class="mb-8">
-        <div
-            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/20 text-primary-600 mb-6">
-            <i class="pi pi-envelope text-2xl"></i>
+<div class="w-full mx-auto fade-in" style="max-width: 28rem">
+    <div class="text-center mb-5">
+        <div class="mb-4 text-primary">
+            <svg class="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l9 6 9-6m-18 0a2 2 0 012-2h14a2 2 0 012 2m-18 0v10a2 2 0 002 2h14a2 2 0 002-2V8" />
+            </svg>
         </div>
-        <h2 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-3">Check your email</h2>
-        <p class="text-surface-600 dark:text-surface-400">
-            We sent a verification code to <br /><span class="font-medium text-surface-900 dark:text-surface-0">{{ email
-                }}</span>
-        </p>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Verify Email</h2>
+        <p class="text-gray-600 dark:text-gray-400 m-0">Please enter the code sent to <br> <span
+                class="font-medium text-gray-900 dark:text-gray-100">{{email}}</span></p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-8 items-center">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
 
-        <div class="flex justify-center w-full">
-            <p-inputotp formControlName="code" [length]="4" styleClass="gap-4"></p-inputotp>
+        <div class="flex justify-center">
+            <!-- Simplified OTP input using standard text input for now -->
+            <app-input formControlName="code" placeholder="1 2 3 4" class="text-center text-2xl tracking-widest"
+                [error]="(form.get('code')?.touched && form.get('code')?.invalid) ? 'Code is required' : ''"></app-input>
         </div>
 
-        <div class="w-full flex flex-col gap-4">
-            <p-button type="submit" label="Verify email" [loading]="isLoading()"
-                [disabled]="form.invalid || form.value.code?.length !== 4" styleClass="w-full"></p-button>
+        <app-button label="Verify" type="submit" [loading]="isLoading()" [fullWidth]="true"
+            [disabled]="form.invalid"></app-button>
 
-            <p class="text-surface-600 dark:text-surface-400 text-sm">
+        <div class="text-center mt-2">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
                 Didn't receive the code?
-                <span class="text-primary-600 font-medium hover:underline cursor-pointer">Click to resend</span>
+                <button type="button"
+                    class="text-primary font-medium hover:underline focus:outline-none">Resend</button>
             </p>
-
-            <a routerLink="/auth/login"
-                class="text-surface-600 dark:text-surface-400 hover:text-surface-900 dark:hover:text-surface-0 font-medium text-sm no-underline hover:underline cursor-pointer transition-colors flex items-center justify-center gap-2 mt-2">
-                <i class="pi pi-arrow-left"></i> Back to log in
-            </a>
         </div>
     </form>
 </div>

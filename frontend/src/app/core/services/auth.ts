@@ -1,6 +1,7 @@
 
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +14,16 @@ export class AuthService {
   currentUser = computed(() => this.currentUserSig());
   isAuthenticated = computed(() => !!this.currentUserSig());
 
-  constructor(private router: Router) {
-    // Check local storage or token on init
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      this.currentUserSig.set(JSON.parse(storedUser));
+  private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
+
+  constructor() {
+    // Check local storage or token on init only in browser
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        this.currentUserSig.set(JSON.parse(storedUser));
+      }
     }
   }
 
@@ -26,7 +32,9 @@ export class AuthService {
     if (credentials.email === 'admin@example.com') {
       const user = { id: '1', name: 'Admin User' };
       this.currentUserSig.set(user);
-      localStorage.setItem('user', JSON.stringify(user));
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
       this.router.navigate(['/admin']);
       return true;
     }
@@ -35,7 +43,9 @@ export class AuthService {
 
   logout() {
     this.currentUserSig.set(null);
-    localStorage.removeItem('user');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('user');
+    }
     this.router.navigate(['/']);
   }
 }

@@ -1,11 +1,8 @@
-<div class="flex h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-300">
+<div class="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <!-- Sidebar -->
-    <app-sidebar [isCollapsed]="isSidebarCollapsed()" class="flex-none z-30 transition-all duration-300 shadow-md"
-        [ngClass]="{
-      'w-64': !isSidebarCollapsed(),
-      'w-20': isSidebarCollapsed(),
-      'hidden md:block': false
-    }" />
+    <app-sidebar [isCollapsed]="isSidebarCollapsed()"
+        class="flex-none z-30 transition-all duration-300 shadow-2xl" [class.w-72]="!isSidebarCollapsed()"
+        [class.w-20]="isSidebarCollapsed()" />
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
         <!-- Header -->
@@ -13,12 +10,12 @@
 
         <!-- Main Content -->
         <main class="flex-1 overflow-auto p-4 md:p-6 scroll-smooth">
-            <div class="container mx-auto max-w-7xl animate-fade-in">
+            <div class="container mx-auto fade-in" style="max-width: 80rem">
                 <router-outlet />
             </div>
         </main>
 
         <!-- Footer -->
-        <app-footer class="flex-none border-t border-surface-200 dark:border-surface-700" />
+        <app-footer class="flex-none" />
     </div>
 </div>

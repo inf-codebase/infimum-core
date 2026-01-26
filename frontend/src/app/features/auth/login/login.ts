@@ -1,13 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../../../core/services/auth';
-import { MessageModule } from 'primeng/message';
+import { AuthService } from '../../../core/services/auth';
+import { AppInput } from '../../../shared/components/app-input/app-input.component';
+import { AppButton } from '../../../shared/components/app-button/app-button.component';
+import { AppCheckbox } from '../../../shared/components/app-checkbox/app-checkbox.component';
 
 @Component({
   selector: 'app-login',
@@ -16,11 +14,9 @@ import { MessageModule } from 'primeng/message';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    InputTextModule,
-    PasswordModule,
-    CheckboxModule,
-    ButtonModule,
-    MessageModule
+    AppInput,
+    AppButton,
+    AppCheckbox
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',

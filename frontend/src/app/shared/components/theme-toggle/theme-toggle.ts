@@ -1,11 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
-  imports: [CommonModule, ButtonModule],
+  imports: [CommonModule],
   templateUrl: './theme-toggle.html',
   styleUrl: './theme-toggle.css',
 })
