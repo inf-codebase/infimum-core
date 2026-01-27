@@ -77,7 +77,7 @@ export const DEFAULT_CONFIG: AppConfig = {
         ],
     },
     footer: {
-        copyright: '© 2024 Infimum Inc. All rights reserved.',
+        copyright: '© 2026 Infimum Inc. All rights reserved.',
         links: [
             { label: 'Privacy', path: '/privacy' },
             { label: 'Terms', path: '/terms' },
