@@ -3,7 +3,8 @@
     "siteDescription": "Modern Angular Dashboard Template",
     "logo": "/assets/logo.svg",
     "favicon": "/favicon.ico",
-    "defaultTheme": "rainypirate",
+    "defaultTheme": "light",
+    "darkTheme": "dark",
     "features": {
         "analytics": true,
         "userManagement": true,

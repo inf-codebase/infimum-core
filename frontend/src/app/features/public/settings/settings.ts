@@ -12,7 +12,7 @@ import { ToastService } from '../../../shared/services/toast.service';
  */
 @Component({
   selector: 'app-settings',
-  imports: [CommonModule, FormsModule, Card, AppButton, AppCheckbox, ThemeToggle],
+  imports: [CommonModule, FormsModule, Card, AppButton, ThemeToggle],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })

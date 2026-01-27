@@ -10,7 +10,8 @@ export interface AppConfig {
     favicon: string;
 
     /** Theming */
-    defaultTheme: 'rainypirate' | 'forest';
+    defaultTheme: 'light' | string;
+    darkTheme: 'dark' | 'forest' | string;
 
     /** Feature toggles */
     features: {
@@ -53,7 +54,8 @@ export const DEFAULT_CONFIG: AppConfig = {
     siteDescription: 'Modern Angular Dashboard Template',
     logo: '/assets/logo.svg',
     favicon: '/favicon.ico',
-    defaultTheme: 'rainypirate',
+    defaultTheme: 'light',
+    darkTheme: 'dark',
     features: {
         analytics: true,
         userManagement: true,
