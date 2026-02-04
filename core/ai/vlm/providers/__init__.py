@@ -1,3 +1,5 @@
 """VLM provider implementations."""
 
-__all__ = []
+from .deepseek_ocr import DeepSeekOCRProviderAdapter
+
+__all__ = ["DeepSeekOCRProviderAdapter"]
