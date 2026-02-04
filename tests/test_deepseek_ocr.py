@@ -22,7 +22,7 @@ sys.modules["core.ai.speech.models.speech2text"] = MagicMock()
 sys.modules["core.ai.speech.models.text2speech"] = MagicMock()
 
 # Add project root to path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from core.ai.vlm.providers.deepseek_ocr import DeepSeekOCRProviderAdapter

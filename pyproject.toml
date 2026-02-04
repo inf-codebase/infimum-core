@@ -28,6 +28,14 @@ dependencies = [
     "redis>=7.1.0",
     "scikit-learn>=1.7.2",
     "sqlalchemy>=2.0.45",
+    "addict>=2.4.0",
+    "easydict>=1.13",
+    "einops>=0.8.2",
+    "tokenizers==0.20.3",
+    "torch==2.6.0",
+    "torchvision",
+    "torchaudio",
+    "transformers==4.46.3",
     "tqdm==4.67.1",
 ]
 
@@ -67,3 +75,13 @@ dev = [
     "pytest>=9.0.2",
     "pytest-asyncio>=0.23.0",
 ]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
