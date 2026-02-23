@@ -9,7 +9,7 @@ from typing import List, Union, Optional
 from core.utils import auto_config
 from core.ai.embeddings.factory import EmbeddingProviderFactory
 from core.ai.embeddings.openai_provider import OpenAIEmbeddingProvider
-from core.exceptions import EmbeddingError, ConfigurationError
+from core.utils.exceptions import EmbeddingError, ConfigurationError
 from loguru import logger
 
 # Register default OpenAI provider

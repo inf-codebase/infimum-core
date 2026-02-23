@@ -37,7 +37,7 @@ class Document(BaseModel):
         BaseModel: pydantic base class. 
 
     Returns:
-        Document: Based entity for document in Particula Machine Learning.
+        Document: Based entity for document.
     """
     
     id: Optional[str] = None
