@@ -10,7 +10,7 @@ from functools import wraps
 from typing import Callable, TypeVar, Any
 from loguru import logger
 
-from core.exceptions import (
+from core.utils.exceptions import (
     DatabaseException,
     DatabaseConnectionError,
     DatabaseQueryError,

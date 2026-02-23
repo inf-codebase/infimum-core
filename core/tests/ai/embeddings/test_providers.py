@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch, MagicMock
 from core.ai.embeddings.base import EmbeddingProvider
 from core.ai.embeddings.openai_provider import OpenAIEmbeddingProvider
 from core.ai.embeddings.factory import EmbeddingProviderFactory
-from core.exceptions import EmbeddingError, ConfigurationError
+from core.utils.exceptions import EmbeddingError, ConfigurationError
 
 
 class TestEmbeddingProvider:

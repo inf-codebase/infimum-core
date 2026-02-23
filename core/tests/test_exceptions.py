@@ -6,7 +6,7 @@ can be caught at appropriate levels.
 """
 
 import pytest
-from core.exceptions import (
+from core.utils.exceptions import (
     CoreException,
     DatabaseException,
     DatabaseConnectionError,

@@ -35,7 +35,7 @@ from pymilvus import (
 from core.database.base import DatabaseManager
 from core.database.interfaces import VectorDatabaseManager
 from core.database.base import DatabaseConnectionConfig, VectorCollectionConfig, VectorIndexConfig
-from core.exceptions import DatabaseConnectionError, DatabaseQueryError
+from core.utils.exceptions import DatabaseConnectionError, DatabaseQueryError
 from loguru import logger
 import warnings
 

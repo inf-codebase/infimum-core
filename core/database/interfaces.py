@@ -16,7 +16,7 @@ from core.database.base import DatabaseManager
 from core.base.entity import Document
 
 if TYPE_CHECKING:
-    from core.database.config import VectorIndexConfig
+    from core.database.base import VectorIndexConfig
 
 
 class VectorDatabaseManager(DatabaseManager):
