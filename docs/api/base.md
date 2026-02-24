@@ -1,0 +1,3 @@
+# core.base
+
+::: core.base

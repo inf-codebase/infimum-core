@@ -1,0 +1,3 @@
+# core.database
+
+::: core.database
