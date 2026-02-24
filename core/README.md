@@ -12,30 +12,23 @@ Infimum core library: base entities, engine (DI/context/startup), database layer
 pip install infimum-core
 ```
 
-**From GitHub:**
+**From GitHub (default branch):**
 
 ```bash
 pip install "git+https://github.com/inf-codebase/infimum.git#subdirectory=core"
 ```
 
-For a specific branch: add `@branch` before `#subdirectory`, e.g. `...infimum.git@main#subdirectory=core`.
-
-Then `import core` in Python. Local editable: `pip install -e ./core` from repo root. Optional extras: `pip install infimum-core[all-db,security,llm]` (see table below).
-
-## Build a wheel
-
-From the repository root:
+**From a GitHub release:** use the release tag (e.g. `v0.1.0`) with `@tag` before `#subdirectory`:
 
 ```bash
-pip install build
-python -m build core/
+pip install "git+https://github.com/inf-codebase/infimum.git@v0.1.0#subdirectory=core"
 ```
 
-Wheels and sdist are written to `core/dist/`. Install the wheel with:
+**From a specific branch:** e.g. `...infimum.git@main#subdirectory=core`.
 
-```bash
-pip install core/dist/infimum_core-*.whl
-```
+Then `import core` in Python. Local editable: `pip install -e ./core` from repo root. With [uv](https://docs.astral.sh/uv/): `uv sync --project core` from repo root. Optional extras: `pip install infimum-core[all-db,security,llm]` (see table below).
+
+
 
 ## Optional extras
 
