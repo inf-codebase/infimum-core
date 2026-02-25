@@ -3,7 +3,13 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
-from datetime import UTC, datetime, timezone
+
+try:
+    from datetime import UTC, datetime, timezone
+except ImportError:
+    # Python 3.10 compatibility: UTC is not defined in datetime module
+    from datetime import datetime, timezone
+    UTC = timezone.utc
 
 
 class EventType(str, Enum):

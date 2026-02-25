@@ -13,8 +13,8 @@ from typing import Union, List, Optional, Iterator, Tuple
 
 from pathlib import Path
 from PIL import Image
-from ...core.data.base import BaseLoader
-from ...core.data.item import DataItem
+from core.ai.base import BaseLoader
+from core.ai.base.data import DataItem
 
 
 # --- VideoStreamer helpers (stdlib only) ---
