@@ -35,8 +35,32 @@ nav:
   - Home: index.md
   - Getting started: getting-started.md
   - API Reference:
-    - core.base: api/base.md
-    - core.engine: api/engine.md
-    - core.database: api/database.md
-    - core.ai: api/ai.md
-    - core.utils: api/utils.md
+    - core.base:
+      - Overview: api/base.md
+      - core.base.entity: api/base/entity.md
+      - core.base.registry: api/base/registry.md
+      - core.base.repository: api/base/repository.md
+    - core.engine:
+      - Overview: api/engine.md
+      - core.engine.context: api/engine/context.md
+      - core.engine.startup: api/engine/startup.md
+      - core.engine.decorators: api/engine/decorators.md
+      - core.engine.security: api/engine/security.md
+    - core.database:
+      - Overview: api/database.md
+      - core.database.base: api/database/base.md
+      - core.database.interfaces: api/database/interfaces.md
+      - core.database.postgres: api/database/postgres.md
+    - core.ai:
+      - Overview: api/ai.md
+      - core.ai.base: api/ai/base.md
+      - core.ai.vlm: api/ai/vlm.md
+      - core.ai.speech: api/ai/speech.md
+      - core.ai.llm: api/ai/llm.md
+      - core.ai.preprocessing: api/ai/preprocessing.md
+      - core.ai.embeddings: api/ai/embeddings.md
+      - core.ai.data: api/ai/data.md
+    - core.utils:
+      - Overview: api/utils.md
+      - core.utils.auto_config: api/utils/auto_config.md
+      - core.utils.constants: api/utils/constants.md
