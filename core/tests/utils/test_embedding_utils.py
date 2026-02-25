@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from core.utils.embedding_utils import text_to_embedding
 from core.utils.exceptions import EmbeddingError, ConfigurationError
-from core.ai.embeddings.factory import EmbeddingProviderFactory
+from core.ai.preprocessing.embeddings.factory import EmbeddingProviderFactory
 
 
 class TestTextToEmbedding:

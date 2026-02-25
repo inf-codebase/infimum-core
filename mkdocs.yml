@@ -57,8 +57,9 @@ nav:
       - core.ai.vlm: api/ai/vlm.md
       - core.ai.speech: api/ai/speech.md
       - core.ai.llm: api/ai/llm.md
-      - core.ai.preprocessing: api/ai/preprocessing.md
-      - core.ai.embeddings: api/ai/embeddings.md
+      - core.ai.preprocessing:
+        - Overview: api/ai/preprocessing.md
+        - core.ai.preprocessing.embeddings: api/ai/preprocessing/embeddings.md
       - core.ai.data: api/ai/data.md
     - core.utils:
       - Overview: api/utils.md
