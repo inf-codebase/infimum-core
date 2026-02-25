@@ -3,7 +3,12 @@
 from .image import ImageLoader
 from .text import TextLoader
 from .audio import AudioLoader
-from .video import VideoLoader
+from .video import (
+    VideoLoader,
+    VideoStreamer,
+    get_video_content_type,
+    parse_range_header,
+)
 from .multimodal import MultimodalLoader
 
 from ...core.data.factory import LoaderFactory
@@ -20,5 +25,8 @@ __all__ = [
     "TextLoader",
     "AudioLoader",
     "VideoLoader",
+    "VideoStreamer",
+    "get_video_content_type",
+    "parse_range_header",
     "MultimodalLoader",
 ]
