@@ -1,7 +1,6 @@
 from core.database import DatabaseFactory
 from core.engine.context import context
 from fastapi import FastAPI
-from core.engine.decorators import func_decorator
 from loguru import logger
 from core.utils.auto_config import get_config_by_prefixes
 from core.base.registry import EntityRegistry  # Import the registry
@@ -11,12 +10,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import select
 
 class Startup:
-    @staticmethod
-    def include_service(app: FastAPI, service_type_or_router):
-        router = service_type_or_router
-        app.include_router(router)
-        return func_decorator
-
     @staticmethod
     def initialize(create_tables=True, discover_entities=True, entities_package='entities'):
         try:
@@ -84,7 +77,6 @@ class Startup:
 
         except Exception as e:
             logger.error(f"Error initializing database tables: {str(e)}")
-        return func_decorator
 
     @staticmethod
     def create_tables_for_db(database_name, drop_first=False):
