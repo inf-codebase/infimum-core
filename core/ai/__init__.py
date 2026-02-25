@@ -34,25 +34,35 @@ from .base import (
     Event,
 )
 
-# LLM module
-from .llm import (
-    Agent,
-    ToolManager,
-    Tool,
-    WebSearchTool,
-    CalculatorTool,
-    WeatherTool,
-    TimeTool,
-    Planner,
-    Memory,
-    AGENT_PROMPTS,
-    PLANNER_PROMPTS,
-    MEMORY_PROMPTS,
-)
+# LLM module — optional; may be absent when LLM extras are not installed
+try:
+    from .llm import (
+        Agent,
+        ToolManager,
+        Tool,
+        WebSearchTool,
+        CalculatorTool,
+        WeatherTool,
+        TimeTool,
+        Planner,
+        Memory,
+        AGENT_PROMPTS,
+        PLANNER_PROMPTS,
+        MEMORY_PROMPTS,
+    )
+except (ImportError, ModuleNotFoundError):
+    # LLM agent sub-package is optional; skip gracefully
+    Agent = ToolManager = Tool = None
+    WebSearchTool = CalculatorTool = WeatherTool = TimeTool = None
+    Planner = Memory = None
+    AGENT_PROMPTS = PLANNER_PROMPTS = MEMORY_PROMPTS = {}
 
-# Speech module
-from .speech.models.speech2text import Speech2Text
-from .speech.models.text2speech import Text2Speech
+# Speech module — optional
+try:
+    from .speech.models.speech2text import Speech2Text
+    from .speech.models.text2speech import Text2Speech
+except (ImportError, ModuleNotFoundError):
+    Speech2Text = Text2Speech = None
 
 __all__ = [
     # Core
