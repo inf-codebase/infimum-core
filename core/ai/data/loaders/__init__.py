@@ -6,7 +6,7 @@ from .audio import AudioLoader
 from .video import VideoLoader
 from .multimodal import MultimodalLoader
 
-from ...core.data.factory import LoaderFactory
+from ...base.data.factory import LoaderFactory
 
 # Register loaders
 LoaderFactory.register("image", ImageLoader)

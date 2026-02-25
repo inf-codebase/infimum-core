@@ -4,7 +4,7 @@ from .image import ResizeTransform, NormalizeTransform, AugmentTransform
 from .text import TokenizeTransform, CleanTransform, NormalizeTextTransform
 from .audio import ResampleTransform, NormalizeAudioTransform
 
-from ...core.preprocessing.factory import TransformFactory
+from ...base.preprocessing.factory import TransformFactory
 
 # Register transforms
 TransformFactory.register("resize", ResizeTransform)
