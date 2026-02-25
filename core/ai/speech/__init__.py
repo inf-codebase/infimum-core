@@ -1,7 +1,7 @@
 """Speech module for speech-to-text and text-to-speech."""
 
-from ..providers.speech.whisper_provider import WhisperProvider
-from ..providers.speech.medasr_provider import MedASRProvider
+from .providers.whisper_provider import WhisperProvider
+from .providers.medasr_provider import MedASRProvider
 from ..base.providers import ProviderFactory
 
 # Register Whisper provider

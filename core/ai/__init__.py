@@ -34,20 +34,10 @@ from .base import (
     Event,
 )
 
-# LLM module
+# LLM module imports
 from .llm import (
     Agent,
-    ToolManager,
-    Tool,
-    WebSearchTool,
-    CalculatorTool,
-    WeatherTool,
-    TimeTool,
-    Planner,
-    Memory,
-    AGENT_PROMPTS,
-    PLANNER_PROMPTS,
-    MEMORY_PROMPTS,
+    ToolRegistry,
 )
 
 # Speech module
@@ -75,17 +65,7 @@ __all__ = [
     "Event",
     # LLM / Agent
     "Agent",
-    "ToolManager",
-    "Tool",
-    "WebSearchTool",
-    "CalculatorTool",
-    "WeatherTool",
-    "TimeTool",
-    "Planner",
-    "Memory",
-    "AGENT_PROMPTS",
-    "PLANNER_PROMPTS",
-    "MEMORY_PROMPTS",
+    "ToolRegistry",
     # Speech
     "Speech2Text",
     "Text2Speech",
