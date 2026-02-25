@@ -7,8 +7,8 @@ while using the new provider system under the hood.
 
 from typing import List, Union, Optional
 from core.utils import auto_config
-from core.ai.embeddings.factory import EmbeddingProviderFactory
-from core.ai.embeddings.openai_provider import OpenAIEmbeddingProvider
+from core.ai.preprocessing.embeddings.factory import EmbeddingProviderFactory
+from core.ai.preprocessing.embeddings.openai_provider import OpenAIEmbeddingProvider
 from core.utils.exceptions import EmbeddingError, ConfigurationError
 from loguru import logger
 
