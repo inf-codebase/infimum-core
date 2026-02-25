@@ -102,20 +102,38 @@ def register_builtin_backends() -> None:
     This function registers the standard database backends that come with
     the core module. It's called automatically when DatabaseFactory is initialized.
     """
-    from core.database.postgres import PostgresDatabaseManagerImpl
-    from core.database.milvus import MilvusManager, AsyncMilvusManager
-    from core.database.qdrant import QdrantManager, AsyncQdrantManager
-    from core.database.mongo import SyncMongoManager, AsyncMongoManager
-    
-    # Register sync backends
-    DatabaseBackendRegistry.register("postgres", PostgresDatabaseManagerImpl)
-    DatabaseBackendRegistry.register("milvus", MilvusManager)
-    DatabaseBackendRegistry.register("qdrant", QdrantManager)
-    DatabaseBackendRegistry.register("mongo", SyncMongoManager)
-    
-    # Register async backends with suffix
-    DatabaseBackendRegistry.register("milvus_async", AsyncMilvusManager)
-    DatabaseBackendRegistry.register("qdrant_async", AsyncQdrantManager)
-    DatabaseBackendRegistry.register("mongo_async", AsyncMongoManager)
-    
+    try:
+        from core.database.milvus import MilvusManager, AsyncMilvusManager
+        DatabaseBackendRegistry.register("milvus", MilvusManager)
+    except Exception as e:
+        logger.warning(f"registering milvus backend failed: {e}", exc_info=True)
+        
+    try:
+        from core.database.qdrant import QdrantManager, AsyncQdrantManager
+        DatabaseBackendRegistry.register("qdrant", QdrantManager)
+    except Exception as e:
+        logger.warning(f"registering qdrant backend failed: {e}", exc_info=True)
+        
+    try:
+        from core.database.mongo import SyncMongoManager, AsyncMongoManager
+        DatabaseBackendRegistry.register("mongo", SyncMongoManager)
+    except Exception as e:
+        logger.warning(f"registering mongo backend failed: {e}", exc_info=True)
+        
+    try:
+        DatabaseBackendRegistry.register("milvus_async", AsyncMilvusManager)
+    except Exception as e:
+        logger.warning(f"registering milvus_async backend failed: {e}", exc_info=True)
+        
+    try:
+        DatabaseBackendRegistry.register("qdrant_async", AsyncQdrantManager)
+    except Exception as e:
+        logger.warning(f"registering qdrant_async backend failed: {e}", exc_info=True)
+        
+    try:
+        from core.database.postgres import PostgresDatabaseManagerImpl
+        DatabaseBackendRegistry.register("postgres", PostgresDatabaseManagerImpl)
+    except Exception as e:
+        logger.warning(f"registering postgres backend failed: {e}", exc_info=True)
+        
     logger.info("Registered built-in database backends")

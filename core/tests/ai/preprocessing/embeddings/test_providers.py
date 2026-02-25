@@ -7,9 +7,9 @@ and provider implementations.
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from core.ai.embeddings.base import EmbeddingProvider
-from core.ai.embeddings.openai_provider import OpenAIEmbeddingProvider
-from core.ai.embeddings.factory import EmbeddingProviderFactory
+from core.ai.preprocessing.embeddings.base import EmbeddingProvider
+from core.ai.preprocessing.embeddings.openai_provider import OpenAIEmbeddingProvider
+from core.ai.preprocessing.embeddings.factory import EmbeddingProviderFactory
 from core.utils.exceptions import EmbeddingError, ConfigurationError
 
 
@@ -55,7 +55,7 @@ class TestOpenAIEmbeddingProvider:
         
         assert provider.default_model == "text-embedding-3-large"
     
-    @patch('core.ai.embeddings.openai_provider.OpenAI')
+    @patch('core.ai.preprocessing.embeddings.openai_provider.OpenAI')
     def test_embed_single_text(self, mock_openai_class):
         """Test embedding a single text."""
         mock_client = Mock()
@@ -72,7 +72,7 @@ class TestOpenAIEmbeddingProvider:
         assert result[0] == [0.1, 0.2, 0.3, 0.4]
         mock_client.embeddings.create.assert_called_once()
     
-    @patch('core.ai.embeddings.openai_provider.OpenAI')
+    @patch('core.ai.preprocessing.embeddings.openai_provider.OpenAI')
     def test_embed_list_of_texts(self, mock_openai_class):
         """Test embedding a list of texts."""
         mock_client = Mock()
@@ -92,7 +92,7 @@ class TestOpenAIEmbeddingProvider:
         assert result[0] == [0.1, 0.2]
         assert result[1] == [0.3, 0.4]
     
-    @patch('core.ai.embeddings.openai_provider.OpenAI')
+    @patch('core.ai.preprocessing.embeddings.openai_provider.OpenAI')
     def test_embed_with_custom_model(self, mock_openai_class):
         """Test embedding with custom model."""
         mock_client = Mock()
@@ -109,7 +109,7 @@ class TestOpenAIEmbeddingProvider:
         call_args = mock_client.embeddings.create.call_args
         assert call_args[1]['model'] == "text-embedding-3-large"
     
-    @patch('core.ai.embeddings.openai_provider.OpenAI')
+    @patch('core.ai.preprocessing.embeddings.openai_provider.OpenAI')
     def test_embed_api_error(self, mock_openai_class):
         """Test that API errors are properly handled."""
         mock_client = Mock()
