@@ -4,17 +4,82 @@ from .image import ResizeTransform, NormalizeTransform, AugmentTransform
 from .text import TokenizeTransform, CleanTransform, NormalizeTextTransform
 from .audio import ResampleTransform, NormalizeAudioTransform
 
-from ...core.preprocessing.factory import TransformFactory
+from ...base.preprocessing.registration import register_transform
+from ...base.preprocessing.registry import TransformMetadata
 
-# Register transforms
-TransformFactory.register("resize", ResizeTransform)
-TransformFactory.register("normalize", NormalizeTransform)
-TransformFactory.register("augment", AugmentTransform)
-TransformFactory.register("tokenize", TokenizeTransform)
-TransformFactory.register("clean", CleanTransform)
-TransformFactory.register("normalize_text", NormalizeTextTransform)
-TransformFactory.register("resample", ResampleTransform)
-TransformFactory.register("normalize_audio", NormalizeAudioTransform)
+# Register transforms (unified: updates both Factory and Registry)
+register_transform(
+    "resize",
+    ResizeTransform,
+    TransformMetadata(
+        transform_name="resize",
+        data_type="image",
+        description="Resize images to target dimensions",
+    ),
+)
+register_transform(
+    "normalize",
+    NormalizeTransform,
+    TransformMetadata(
+        transform_name="normalize",
+        data_type="image",
+        description="Normalize image pixel values",
+    ),
+)
+register_transform(
+    "augment",
+    AugmentTransform,
+    TransformMetadata(
+        transform_name="augment",
+        data_type="image",
+        description="Augment images with random transformations",
+    ),
+)
+register_transform(
+    "tokenize",
+    TokenizeTransform,
+    TransformMetadata(
+        transform_name="tokenize",
+        data_type="text",
+        description="Tokenize text into tokens",
+    ),
+)
+register_transform(
+    "clean",
+    CleanTransform,
+    TransformMetadata(
+        transform_name="clean",
+        data_type="text",
+        description="Clean text by removing noise",
+    ),
+)
+register_transform(
+    "normalize_text",
+    NormalizeTextTransform,
+    TransformMetadata(
+        transform_name="normalize_text",
+        data_type="text",
+        description="Normalize text casing and whitespace",
+    ),
+)
+register_transform(
+    "resample",
+    ResampleTransform,
+    TransformMetadata(
+        transform_name="resample",
+        data_type="audio",
+        description="Resample audio to target sample rate",
+    ),
+)
+register_transform(
+    "normalize_audio",
+    NormalizeAudioTransform,
+    TransformMetadata(
+        transform_name="normalize_audio",
+        data_type="audio",
+        description="Normalize audio amplitude",
+    ),
+)
 
 __all__ = [
     "ResizeTransform",
