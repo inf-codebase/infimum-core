@@ -131,18 +131,24 @@ class BaseProvider(ABC, Observable):
             raise
     
     def _validate_config(self, config: ModelConfig) -> None:
-        """
-        Validate configuration - common step, can be overridden.
-        
+        """Validate cấu hình model - bước chung, có thể được override.
+
+        Uỷ thác toàn bộ logic validation cho ``ModelConfig.validate()`` để đảm
+        bảo tính nhất quán (consistency) giữa provider và config.
+
+        Contract:
+            - ``model_path`` bắt buộc cho các model local (LLaVA, Whisper offline…).
+            - ``model_name`` bắt buộc cho các model API từ xa (OpenAI, Cohere…).
+            - Ít nhất một trong hai phải được cung cấp.
+
         Args:
-            config: Configuration to validate
-            
+            config: Cấu hình cần kiểm tra.
+
         Raises:
-            ValueError: If configuration is invalid
+            ValueError: Nếu cấu hình không hợp lệ (thiếu model_path/model_name,
+                model_type hoặc provider).
         """
-        # Accept either model_path or model_name for flexibility
-        if not config.model_path and not config.model_name:
-            raise ValueError("Either model_path or model_name is required")
+        config.validate()
     
     def _is_cached(self, config: ModelConfig) -> bool:
         """

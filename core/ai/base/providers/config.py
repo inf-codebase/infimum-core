@@ -18,10 +18,28 @@ class ModelType(str, Enum):
 
 @dataclass
 class ModelConfig:
-    """Model configuration."""
+    """Model configuration.
+
+    Attributes:
+        model_type: Loại model (llm, vlm, speech, ...).
+        provider: Tên provider (openai, whisper, llava, ...).
+        model_path: Đường dẫn đến model local.
+            Dùng cho các model chạy on-premise / local (ví dụ LLaVA, Whisper local).
+            Bắt buộc khi ``model_name`` không được cung cấp.
+        model_name: Tên model API (ví dụ "gpt-4o", "text-embedding-3-small").
+            Dùng cho các provider API từ xa (OpenAI, Cohere, ...).
+            Bắt buộc khi ``model_path`` không được cung cấp.
+        model_base: Đường dẫn base model tuỳ chọn.
+        device: Thiết bị tính toán (cuda, cpu, mps).
+        load_8bit: Bật quantization 8-bit.
+        load_4bit: Bật quantization 4-bit.
+        temperature: Nhiệt độ sinh văn bản.
+        max_tokens: Số token tối đa.
+        extra_params: Tham số mở rộng tuỳ provider.
+    """
     model_type: str
     provider: str
-    model_path: str
+    model_path: Optional[str] = None
     model_base: Optional[str] = None
     model_name: Optional[str] = None
     device: Optional[str] = None
@@ -30,22 +48,39 @@ class ModelConfig:
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
     extra_params: Dict[str, Any] = field(default_factory=dict)
-    
+
     def validate(self) -> None:
-        """Validate configuration."""
-        if not self.model_path:
-            raise ValueError("model_path is required")
+        """Validate cấu hình model.
+
+        Bắt buộc:
+        - ``model_type`` và ``provider`` luôn phải có.
+        - Ít nhất một trong ``model_path`` hoặc ``model_name`` phải được cung cấp:
+
+          * ``model_path``: dùng cho model local (ví dụ LLaVA, Whisper chạy offline).
+          * ``model_name``: dùng cho model API từ xa (ví dụ OpenAI, Cohere).
+
+        Raises:
+            ValueError: Nếu thiếu ``model_type``, ``provider``,
+                hoặc thiếu cả ``model_path`` và ``model_name``.
+        """
         if not self.model_type:
-            raise ValueError("model_type is required")
+            raise ValueError("model_type là bắt buộc")
         if not self.provider:
-            raise ValueError("provider is required")
-    
+            raise ValueError("provider là bắt buộc")
+        if not self.model_path and not self.model_name:
+            raise ValueError(
+                "Cần cung cấp ít nhất một trong hai: "
+                "model_path (dùng cho model local) "
+                "hoặc model_name (dùng cho model API từ xa)"
+            )
+
     def __hash__(self) -> int:
         """Make config hashable."""
         return hash((
             self.model_type,
             self.provider,
             self.model_path,
+            self.model_name,
             self.model_base,
             self.device,
             self.load_8bit,
@@ -61,7 +96,6 @@ class ModelConfigBuilder:
         self._config = ModelConfig(
             model_type="",
             provider="",
-            model_path=""
         )
     
     def with_model_type(self, model_type: str) -> 'ModelConfigBuilder':
