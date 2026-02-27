@@ -41,6 +41,10 @@ class DatabaseManager(ABC):
             An existing record instance or a new (unsaved) instance
         """
         pass
+    
+    @abstractmethod
+    def get_session(self):
+        pass
 
 class VectorIndexConfig(BaseModel):
     """Configuration for vector database indexes.

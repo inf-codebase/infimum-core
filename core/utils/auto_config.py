@@ -35,7 +35,7 @@ class AutoConfigImpl(AutoConfig):
             raw_value = str(value).strip()
             expanded_value = Template(raw_value).safe_substitute(env_context)
 
-            if ',type=' in expanded_value:
+            if (',type=' in expanded_value) or ('|type=' in expanded_value):
                 base_value, type_hint = expanded_value.split(',type=', 1)
                 base_value = base_value.strip()
                 type_hint = type_hint.strip()

@@ -1,7 +1,7 @@
 """Unit tests for core.engine.startup module."""
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from core.engine.startup import Startup
+from core.engine.startup import Engine
 from fastapi import FastAPI
 
 
@@ -14,7 +14,7 @@ class TestStartup:
         from fastapi import APIRouter
         mock_router = APIRouter()
         
-        result = Startup.include_service(app, mock_router)
+        result = Engine.include_service(app, mock_router)
         
         # Verify router was included (check that routers list contains it)
         assert len(app.routes) > 0
@@ -33,7 +33,7 @@ class TestStartup:
         mock_context.get_database_manager.return_value = mock_db_manager
         mock_registry.create_tables.return_value = True
         
-        Startup.initialize(create_tables=True, discover_entities=False)
+        Engine.initialize(create_tables=True, discover_entities=False)
         
         mock_context.register_postgres.assert_called()
         mock_registry.create_tables.assert_called()
@@ -47,7 +47,7 @@ class TestStartup:
             "MONGO_DATABASE_MAIN": "main_db"
         }
         
-        Startup.initialize(create_tables=False, discover_entities=False)
+        Engine.initialize(create_tables=False, discover_entities=False)
         
         mock_context.register_mongo.assert_called()
 
@@ -58,7 +58,7 @@ class TestStartup:
         """Test initialization with entity discovery."""
         mock_get_config.return_value = {}
         
-        Startup.initialize(discover_entities=True, entities_package="test_entities")
+        Engine.initialize(discover_entities=True, entities_package="test_entities")
         
         mock_registry.discover_entities.assert_called_once_with("test_entities")
 
@@ -71,7 +71,7 @@ class TestStartup:
         mock_context.get_database_manager.return_value = mock_db_manager
         mock_registry.create_tables.return_value = True
         
-        Startup.create_tables_for_db("test_db", drop_first=False)
+        Engine.create_tables_for_db("test_db", drop_first=False)
         
         mock_registry.create_tables.assert_called_once_with(mock_db_manager, False)
 
@@ -84,6 +84,6 @@ class TestStartup:
         mock_context.get_database_manager.return_value = mock_db_manager
         mock_registry.create_tables.return_value = True
         
-        Startup.create_tables_for_db("test_db", drop_first=True)
+        Engine.create_tables_for_db("test_db", drop_first=True)
         
         mock_registry.create_tables.assert_called_once_with(mock_db_manager, True)
