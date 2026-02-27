@@ -1,4 +1,6 @@
 from core.base.registry import EntityRegistry
+from core.database import DatabaseManager
+from core.engine.context import with_database
 
 class Engine:
     @staticmethod
@@ -6,6 +8,12 @@ class Engine:
         for entities_package in entities_packages:
             EntityRegistry.discover_entities(entities_package)
 
+    @staticmethod
+    def with_database(db_name_or_prefix: str, async_mode: bool = False) -> DatabaseManager:
+        return with_database(db_name_or_prefix, async_mode)
+    
+    
 __all__ = [
     "Engine",
+    "with_database",
 ]

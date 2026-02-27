@@ -649,7 +649,7 @@ def database_session(db_name: str, async_mode: bool = False):
             # Cleanup if needed
             pass
 
-def with_database(db_name_or_prefix: str, async_mode: bool = False):
+def with_database(db_name_or_prefix: str, async_mode: bool = False) -> DatabaseManager:
         """
         Helper function to provide database connection in dependency injection.
 
