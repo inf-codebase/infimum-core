@@ -1,13 +1,13 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from core.database.base import DatabaseManager
 
 ModelType = TypeVar("ModelType")
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType], db: Session):
+    def __init__(self, model: Type[ModelType], db: DatabaseManager):
         self.model = model
         self.db = db
 
@@ -19,9 +19,11 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Create a new record."""
         # Using model_dump() to get a dict from Pydantic models
         db_obj = self.model(**obj_in.model_dump())
-        self.db.add(db_obj)
-        self.db.commit()
-        self.db.refresh(db_obj)
+        
+        with self.db.get_session() as session:  
+            session.add(db_obj)
+            session.commit()
+            session.refresh(db_obj)
         return db_obj
 
     def update(self, id: Any, obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> Optional[ModelType]:
@@ -38,8 +40,9 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         for field, value in update_data.items():
             setattr(db_obj, field, value)
 
-        self.db.commit()
-        self.db.refresh(db_obj)
+        with self.db.get_session() as session:
+            session.commit()
+            session.refresh(db_obj)
         return db_obj
 
     def delete(self, id: Any) -> bool:
@@ -48,6 +51,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if not db_obj:
             return False
 
-        self.db.delete(db_obj)
-        self.db.commit()
+        with self.db.get_session() as session:
+            session.delete(db_obj)
+            session.commit()
         return True
