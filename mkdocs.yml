@@ -1,0 +1,67 @@
+site_name: infimum-core
+site_description: Infimum core library — base, engine, database, AI, utils
+site_url: https://github.com/inf-codebase/infimum-core
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            heading_level: 2
+            show_submodules: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - API Reference:
+    - core.base:
+      - Overview: api/base.md
+      - core.base.entity: api/base/entity.md
+      - core.base.registry: api/base/registry.md
+      - core.base.repository: api/base/repository.md
+    - core.engine:
+      - Overview: api/engine.md
+      - core.engine.context: api/engine/context.md
+      - core.engine.startup: api/engine/startup.md
+      - core.engine.decorators: api/engine/decorators.md
+      - core.engine.security: api/engine/security.md
+    - core.database:
+      - Overview: api/database.md
+      - core.database.base: api/database/base.md
+      - core.database.interfaces: api/database/interfaces.md
+      - core.database.postgres: api/database/postgres.md
+    - core.ai:
+      - Overview: api/ai.md
+      - core.ai.base: api/ai/base.md
+      - core.ai.vlm: api/ai/vlm.md
+      - core.ai.speech: api/ai/speech.md
+      - core.ai.llm: api/ai/llm.md
+      - core.ai.preprocessing:
+        - Overview: api/ai/preprocessing.md
+        - core.ai.preprocessing.embeddings: api/ai/preprocessing/embeddings.md
+      - core.ai.data: api/ai/data.md
+    - core.utils:
+      - Overview: api/utils.md
+      - core.utils.auto_config: api/utils/auto_config.md
+      - core.utils.constants: api/utils/constants.md
