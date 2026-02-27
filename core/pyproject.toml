@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infimum-core"
-version = "v1.2.4"
+version = "v1.2.5"
 description = "Infimum core library: base, engine, database, AI (LLM/VLM/speech), utils"
 readme = "README.md"
 requires-python = ">=3.10"
