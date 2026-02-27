@@ -4,6 +4,7 @@ Factory pattern for creating model providers.
 Allows creation of providers without knowing concrete classes.
 """
 
+import warnings
 from typing import Dict, Tuple, Type, List, Optional
 from .base import BaseProvider
 from .config import ModelConfig
@@ -11,35 +12,50 @@ from .config import ModelConfig
 
 class ProviderFactory:
     """Factory for creating model providers."""
-    
+
     _registry: Dict[Tuple[str, str], Type[BaseProvider]] = {}
-    
+
     @classmethod
-    def register(cls, model_type: str, provider_name: str, provider_class: Type[BaseProvider]) -> None:
+    def register(
+        cls, model_type: str, provider_name: str, provider_class: Type[BaseProvider]
+    ) -> None:
         """
         Register a provider implementation.
-        
+
+        .. deprecated::
+            Use :func:`register_provider` from ``core.ai.base.providers.registration``
+            instead, which registers in both Factory and Registry.
+
         Args:
             model_type: Model type (llm, vlm, speech)
             provider_name: Provider name
             provider_class: Provider class
         """
+        warnings.warn(
+            "ProviderFactory.register() is deprecated. "
+            "Use register_provider() from core.ai.base.providers.registration instead, "
+            "which registers in both Factory and Registry.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         key = (model_type, provider_name)
         cls._registry[key] = provider_class
-    
+
     @classmethod
-    def create(cls, model_type: str, provider_name: str, config: ModelConfig) -> BaseProvider:
+    def create(
+        cls, model_type: str, provider_name: str, config: ModelConfig
+    ) -> BaseProvider:
         """
         Create a provider instance.
-        
+
         Args:
             model_type: Model type
             provider_name: Provider name
             config: Model configuration
-            
+
         Returns:
             BaseProvider instance
-            
+
         Raises:
             ValueError: If provider not registered
         """
@@ -52,41 +68,41 @@ class ProviderFactory:
             )
         provider_class = cls._registry[key]
         return provider_class(config)
-    
+
     @classmethod
     def list_providers(cls, model_type: Optional[str] = None) -> List[str]:
         """
         List available providers.
-        
+
         Args:
             model_type: Optional model type to filter by
-            
+
         Returns:
             List of provider names
         """
         if model_type:
             return [name for (mt, name) in cls._registry.keys() if mt == model_type]
         return [name for (_, name) in cls._registry.keys()]
-    
+
     @classmethod
     def is_registered(cls, model_type: str, provider_name: str) -> bool:
         """
         Check if provider is registered.
-        
+
         Args:
             model_type: Model type
             provider_name: Provider name
-            
+
         Returns:
             True if registered
         """
         return (model_type, provider_name) in cls._registry
-    
+
     @classmethod
     def unregister(cls, model_type: str, provider_name: str) -> None:
         """
         Unregister a provider.
-        
+
         Args:
             model_type: Model type
             provider_name: Provider name
