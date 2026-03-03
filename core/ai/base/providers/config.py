@@ -33,7 +33,7 @@ class ModelConfig:
     extra_params: Dict[str, Any] = field(default_factory=dict)
 
     def validate(self) -> None:
-"""Validate configuration."""
+        """Validate configuration."""
         if not self.model_type:
             raise ValueError("model_type is required")
         if not self.provider:

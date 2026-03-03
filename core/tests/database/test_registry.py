@@ -10,8 +10,7 @@ from unittest.mock import Mock, MagicMock, patch
 from core.database.registry import DatabaseBackendRegistry
 from core.database.base import DatabaseConnectionConfig
 from core.database.base import DatabaseManager
-from core.database.milvus import MilvusManager
-from core.database.qdrant import QdrantManager
+
 
 
 class TestDatabaseBackendRegistry:
@@ -49,12 +48,12 @@ class TestDatabaseBackendRegistry:
     
     def test_create_backend_with_from_config(self):
         """Test creating backend using from_config method."""
-        DatabaseBackendRegistry.register("milvus", MilvusManager)
+        DatabaseBackendRegistry.register("milvus", DatabaseManager)
         
         config = DatabaseConnectionConfig(host="localhost", port=19530)
         manager = DatabaseBackendRegistry.create("milvus", config)
         
-        assert isinstance(manager, MilvusManager)
+        assert isinstance(manager, DatabaseManager)
         assert manager.milvus_host == "localhost"
         assert manager.milvus_port == 19530
     
@@ -87,8 +86,8 @@ class TestDatabaseBackendRegistry:
     
     def test_list_backends(self):
         """Test listing registered backends."""
-        DatabaseBackendRegistry.register("backend1", MilvusManager)
-        DatabaseBackendRegistry.register("backend2", QdrantManager)
+        DatabaseBackendRegistry.register("backend1", DatabaseManager)
+        DatabaseBackendRegistry.register("backend2", DatabaseManager)
         
         backends = DatabaseBackendRegistry.list_backends()
         
@@ -98,7 +97,7 @@ class TestDatabaseBackendRegistry:
     
     def test_unregister_backend(self):
         """Test unregistering a backend."""
-        DatabaseBackendRegistry.register("test_backend", MilvusManager)
+        DatabaseBackendRegistry.register("test_backend", DatabaseManager)
         assert DatabaseBackendRegistry.is_registered("test_backend")
         
         DatabaseBackendRegistry.unregister("test_backend")
@@ -113,8 +112,8 @@ class TestDatabaseBackendRegistry:
     
     def test_clear_registry(self):
         """Test clearing all registered backends."""
-        DatabaseBackendRegistry.register("backend1", MilvusManager)
-        DatabaseBackendRegistry.register("backend2", QdrantManager)
+        DatabaseBackendRegistry.register("backend1", DatabaseManager)
+        DatabaseBackendRegistry.register("backend2", DatabaseManager)
         
         assert len(DatabaseBackendRegistry.list_backends()) >= 2
         

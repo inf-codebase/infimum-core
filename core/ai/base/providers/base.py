@@ -9,8 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from dataclasses import dataclass, field
 from .config import ModelConfig
-from ..observers.base import Observable
-from ..observers.events import Event, EventType
+from core.engine.design_pattern import Observable, Event, EventType
 
 
 @dataclass

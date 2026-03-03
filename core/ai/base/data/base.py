@@ -8,8 +8,7 @@ Template Method Pattern: Common workflow defined in load() with hooks.
 from abc import ABC, abstractmethod
 from typing import Union, Any, Optional
 from pathlib import Path
-from ..observers.base import Observable
-from ..observers.events import Event, EventType
+from core.engine.design_pattern import Observable, Event, EventType
 from .item import DataItem
 
 

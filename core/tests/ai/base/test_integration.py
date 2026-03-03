@@ -5,7 +5,7 @@ Tests how different patterns work together.
 """
 
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 import sys
 from pathlib import Path
@@ -17,7 +17,6 @@ sys.path.insert(0, str(project_root))
 from core.ai.base.providers.base import BaseProvider, ModelHandle
 from core.ai.base.providers.config import ModelConfig, ModelConfigBuilder
 from core.ai.base.providers.factory import ProviderFactory
-from core.ai.base.providers.registry import ProviderRegistry, ProviderMetadata
 
 from core.ai.base.data.base import BaseLoader
 from core.ai.base.data.item import DataItem
@@ -27,8 +26,7 @@ from core.ai.base.preprocessing.base import BaseTransform
 from core.ai.base.preprocessing.pipeline import TransformPipeline
 from core.ai.base.preprocessing.factory import TransformFactory
 
-from core.ai.base.observers.base import Observer, Observable
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Observer, Event, EventType
 
 
 class TestProviderDataIntegration(unittest.TestCase):

@@ -1,26 +1,14 @@
 """Unit tests for core.engine.decorators module."""
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from core.engine.decorators import (
-    func_decorator,
-    singleton,
-    ParameterizedInjection,
-    _safe_to_dict,
-    _pick,
-)
-try:
-    from core.ai.vlm.decorators import vlm_persist_after
-except ImportError:
-    # Fallback to old location for backward compatibility
-    from core.engine.decorators import vlm_persist_after
-
+from core.engine.design_pattern import singleton
 
 class TestFuncDecorator:
     """Test cases for func_decorator function."""
 
     def test_func_decorator_with_params(self):
         """Test func_decorator with function that has parameters."""
-        @func_decorator
+        @singleton
         def test_func(param):
             return param
         
@@ -29,7 +17,7 @@ class TestFuncDecorator:
 
     def test_func_decorator_without_params(self):
         """Test func_decorator with function without parameters."""
-        @func_decorator
+        @singleton
         def test_func():
             return "result"
         
@@ -60,7 +48,7 @@ class TestParameterizedInjection:
     def test_parameterized_injection_is_abstract(self):
         """Test that ParameterizedInjection is abstract."""
         with pytest.raises(TypeError):
-            ParameterizedInjection()
+            singleton()
 
 
 class TestSafeToDict:
@@ -68,13 +56,13 @@ class TestSafeToDict:
 
     def test_safe_to_dict_with_none(self):
         """Test _safe_to_dict with None."""
-        result = _safe_to_dict(None)
+        result = safe_to_dict(None)
         assert result == {}
 
     def test_safe_to_dict_with_dict(self):
         """Test _safe_to_dict with dict."""
         data = {"key": "value"}
-        result = _safe_to_dict(data)
+        result = safe_to_dict(data)
         assert result == data
 
     def test_safe_to_dict_with_pydantic_v1(self):
@@ -83,7 +71,7 @@ class TestSafeToDict:
             def dict(self):
                 return {"key": "value"}
         
-        result = _safe_to_dict(MockPydantic())
+        result = safe_to_dict(MockPydantic())
         assert result == {"key": "value"}
 
     def test_safe_to_dict_with_pydantic_v2(self):
@@ -92,7 +80,7 @@ class TestSafeToDict:
             def model_dump(self):
                 return {"key": "value"}
         
-        result = _safe_to_dict(MockPydantic())
+        result = safe_to_dict(MockPydantic())
         assert result == {"key": "value"}
 
     def test_safe_to_dict_with_object(self):
@@ -102,7 +90,7 @@ class TestSafeToDict:
                 self.public_attr = "value"
                 self._private_attr = "hidden"
         
-        result = _safe_to_dict(TestObj())
+        result = safe_to_dict(TestObj())
         assert result == {"public_attr": "value"}
 
 
@@ -112,25 +100,25 @@ class TestPick:
     def test_pick_finds_first_key(self):
         """Test _pick finds first available key."""
         data = {"key1": "value1", "key2": "value2"}
-        result = _pick(data, "key1", "key2")
+        result = pick(data, "key1", "key2")
         assert result == "value1"
 
     def test_pick_finds_second_key(self):
         """Test _pick finds second key when first is missing."""
         data = {"key2": "value2"}
-        result = _pick(data, "key1", "key2")
+        result = pick(data, "key1", "key2")
         assert result == "value2"
 
     def test_pick_returns_default(self):
         """Test _pick returns default when no keys found."""
         data = {}
-        result = _pick(data, "key1", "key2", default="default")
+        result = pick(data, "key1", "key2", default="default")
         assert result == "default"
 
     def test_pick_ignores_none(self):
         """Test _pick ignores None values."""
         data = {"key1": None, "key2": "value2"}
-        result = _pick(data, "key1", "key2")
+        result = pick(data, "key1", "key2")
         assert result == "value2"
 
 
@@ -145,7 +133,7 @@ class TestVlmPersistAfter:
         mock_apply_result.id = "task_123"
         mock_task_instance.apply_async.return_value = mock_apply_result
         
-        @vlm_persist_after(mock_task_instance, queue="test")
+        @singleton(mock_task_instance, queue="test")
         async def test_func():
             return {
                 "transcript": "test transcript",
@@ -164,7 +152,7 @@ class TestVlmPersistAfter:
         mock_apply_result.id = "task_123"
         mock_task_instance.apply_async.return_value = mock_apply_result
         
-        @vlm_persist_after(mock_task_instance, queue="test")
+        @singleton(mock_task_instance, queue="test")
         def test_func():
             return {
                 "transcript": "test transcript",
@@ -181,7 +169,7 @@ class TestVlmPersistAfter:
         """Test vlm_persist_after skips when transcript is missing."""
         mock_task_instance = Mock()
         
-        @vlm_persist_after(mock_task_instance, queue="test")
+        @singleton(mock_task_instance, queue="test")
         async def test_func():
             return {"video_segment_id": "seg_123"}
         

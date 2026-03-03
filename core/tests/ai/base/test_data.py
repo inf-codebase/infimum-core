@@ -19,7 +19,7 @@ from core.ai.base.data.base import BaseLoader
 from core.ai.base.data.item import DataItem
 from core.ai.base.data.factory import LoaderFactory
 from core.ai.base.data.registry import LoaderRegistry, LoaderMetadata
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Event, EventType
 
 
 class TestDataItem(unittest.TestCase):

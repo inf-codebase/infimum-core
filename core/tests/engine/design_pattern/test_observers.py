@@ -15,8 +15,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from core.ai.base.observers.base import Observer, Observable
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Observer, Observable, Event, EventType
 
 
 class TestObserver(unittest.TestCase):

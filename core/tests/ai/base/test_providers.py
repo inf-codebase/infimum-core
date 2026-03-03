@@ -19,8 +19,7 @@ from core.ai.base.providers.base import BaseProvider, ModelHandle
 from core.ai.base.providers.config import ModelConfig, ModelConfigBuilder, ModelType
 from core.ai.base.providers.factory import ProviderFactory
 from core.ai.base.providers.registry import ProviderRegistry, ProviderMetadata
-from core.ai.base.observers.base import Observer
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Observer, Event, EventType
 
 
 class TestModelConfig(unittest.TestCase):

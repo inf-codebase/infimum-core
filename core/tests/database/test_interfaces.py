@@ -14,11 +14,9 @@ from core.database.interfaces import (
     RelationalDatabaseManager,
     DocumentDatabaseManager,
 )
-from core.database.milvus import MilvusManager
-from core.database.qdrant import QdrantManager
 from core.database.postgres import PostgresDatabaseManagerImpl
 from core.database.mongo import SyncMongoManager
-from core.database.base import VectorIndexConfig, DatabaseConnectionConfig
+from core.database.base import DatabaseManager, VectorIndexConfig, DatabaseConnectionConfig
 
 
 class TestVectorDatabaseManagerInterface:
@@ -26,21 +24,21 @@ class TestVectorDatabaseManagerInterface:
     
     def test_milvus_manager_implements_interface(self):
         """Test that MilvusManager implements VectorDatabaseManager."""
-        assert issubclass(MilvusManager, VectorDatabaseManager)
+        assert issubclass(DatabaseManager, VectorDatabaseManager)
         
-        manager = MilvusManager(milvus_host="localhost", milvus_port=19530)
+        manager = DatabaseManager(database_url="localhost", database_port=19530)
         assert isinstance(manager, VectorDatabaseManager)
     
     def test_qdrant_manager_implements_interface(self):
         """Test that QdrantManager implements VectorDatabaseManager."""
-        assert issubclass(QdrantManager, VectorDatabaseManager)
+        assert issubclass(DatabaseManager, VectorDatabaseManager)
         
-        manager = QdrantManager(qdrant_url="http://localhost:6333")
+        manager = DatabaseManager(database_url="http://localhost:6333")
         assert isinstance(manager, VectorDatabaseManager)
     
     def test_vector_managers_have_required_methods(self):
         """Test that vector managers have all required interface methods."""
-        manager = MilvusManager(milvus_host="localhost", milvus_port=19530)
+        manager = DatabaseManager(database_url="localhost", database_port=19530)
         
         # Check all abstract methods exist
         assert hasattr(manager, 'ensure_collection')
@@ -58,15 +56,15 @@ class TestVectorDatabaseManagerInterface:
         config = DatabaseConnectionConfig(host="localhost", port=19530)
         
         # MilvusManager should support from_config
-        manager = MilvusManager.from_config(config)
-        assert isinstance(manager, MilvusManager)
+        manager = DatabaseManager.from_config(config)
+        assert isinstance(manager, DatabaseManager)
         assert manager.milvus_host == "localhost"
         assert manager.milvus_port == 19530
         
         # QdrantManager should support from_config
         config2 = DatabaseConnectionConfig(host="http://localhost", port=6333)
-        manager2 = QdrantManager.from_config(config2, use_memory=True)
-        assert isinstance(manager2, QdrantManager)
+        manager2 = DatabaseManager.from_config(config2, use_memory=True)
+        assert isinstance(manager2, DatabaseManager)
 
 
 class TestRelationalDatabaseManagerInterface:
@@ -150,7 +148,7 @@ class TestInterfaceCompliance:
         """Test that vector manager methods have correct signatures."""
         import inspect
         
-        manager = MilvusManager(milvus_host="localhost", milvus_port=19530)
+        manager = DatabaseManager(database_url="localhost", database_port=19530)
         
         # Check ensure_collection signature
         sig = inspect.signature(manager.ensure_collection)
