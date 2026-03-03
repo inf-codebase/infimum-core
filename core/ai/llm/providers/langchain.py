@@ -70,12 +70,14 @@ class LangChainProviderAdapter(BaseProvider):
 
 # Register adapter
 ProviderRegistry.register(
-    "llm-langchain",
-    ProviderMetadata(
+    model_type="llm",
+    provider_name="langchain",
+    provider_class=LangChainProviderAdapter,
+    metadata=ProviderMetadata(
         model_type="llm",
         provider_name="langchain",
         capabilities={"rag", "chat", "completion"},
         description="Adapter for existing LangChain-based RAG providers",
-        version="1.0.0"
-    )
+        version="1.0.0",
+    ),
 )

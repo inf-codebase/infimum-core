@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 
 from core.ai.base.providers.base import BaseProvider, ModelHandle
 from core.ai.base.providers.config import ModelConfig, ModelConfigBuilder
-from core.ai.base.providers.factory import ProviderFactory
+from core.ai.base.providers.registry import ProviderRegistry, ProviderMetadata
 
 from core.ai.base.data.base import BaseLoader
 from core.ai.base.data.item import DataItem
@@ -58,13 +58,13 @@ class TestProviderDataIntegration(unittest.TestCase):
         self.MockLoader = MockLoader
         
         # Clear registries
-        ProviderFactory._registry.clear()
+        ProviderRegistry.clear()
         LoaderFactory._registry.clear()
     
     def test_provider_with_loader(self):
         """Test using provider with data loader."""
         # Register components
-        ProviderFactory.register("llm", "mock", self.MockProvider)
+        ProviderRegistry.register("llm", "mock", self.MockProvider, ProviderMetadata("llm", "mock", {"chat"}))
         LoaderFactory.register("test", self.MockLoader)
         
         # Create components using factories
@@ -74,7 +74,7 @@ class TestProviderDataIntegration(unittest.TestCase):
             .with_model_path("/path")
             .build())
         
-        provider = ProviderFactory.create("llm", "mock", config)
+        provider = ProviderRegistry.create("llm", "mock", config)
         loader = LoaderFactory.create("test")
         
         # Use together
@@ -252,14 +252,14 @@ class TestFullWorkflow(unittest.TestCase):
         self.ProcessTransform = ProcessTransform
         
         # Clear registries
-        ProviderFactory._registry.clear()
+        ProviderRegistry.clear()
         LoaderFactory._registry.clear()
         TransformFactory._registry.clear()
     
     def test_complete_workflow(self):
         """Test complete workflow: config -> provider -> loader -> preprocessing."""
         # Register components
-        ProviderFactory.register("llm", "mock", self.MockProvider)
+        ProviderRegistry.register("llm", "mock", self.MockProvider, ProviderMetadata("llm", "mock", {"chat"}))
         LoaderFactory.register("text", self.MockLoader)
         TransformFactory.register("process", self.ProcessTransform)
         
@@ -272,7 +272,7 @@ class TestFullWorkflow(unittest.TestCase):
             .build())
         
         # Create components
-        provider = ProviderFactory.create("llm", "mock", config)
+        provider = ProviderRegistry.create("llm", "mock", config)
         loader = LoaderFactory.create("text")
         pipeline = TransformFactory.create_pipeline(["process"])
         
