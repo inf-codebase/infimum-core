@@ -223,7 +223,6 @@ class DeepSeekOCRProviderAdapter(BaseProvider):
             return ""
 
 
-# Register provider (unified: updates both Factory and Registry)
 ProviderRegistry.register(
     "vlm",
     "deepseek-ocr",
