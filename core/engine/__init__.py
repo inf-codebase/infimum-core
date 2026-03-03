@@ -1,6 +1,8 @@
 from core.base.registry import EntityRegistry
 from core.database import DatabaseManager
 from core.engine.context import with_database
+from core.engine.design_pattern import Observer, Event, EventType
+from core.engine.design_pattern.singleton import singleton
 
 class Engine:
     @staticmethod
@@ -16,4 +18,8 @@ class Engine:
 __all__ = [
     "Engine",
     "with_database",
+    "Observer",
+    "Event",
+    "EventType",
+    "singleton",
 ]

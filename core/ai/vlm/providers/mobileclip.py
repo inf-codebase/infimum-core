@@ -323,12 +323,14 @@ class MobileClipProvider(BaseProvider):
 
 # Register provider
 ProviderRegistry.register(
-    "mobileclip",
-    ProviderMetadata(
+    model_type="vlm",
+    provider_name="mobileclip",
+    provider_class=MobileCLIPProvider,
+    metadata=ProviderMetadata(
         model_type="vlm",
         provider_name="mobileclip",
         capabilities={"video_classification", "event_detection", "zero_shot"},
         description="Apple MobileCLIP2-S0 for fast pickleball event detection",
-        version="0.1.0"
-    )
+        version="0.1.0",
+    ),
 )

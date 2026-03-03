@@ -5,9 +5,10 @@ Adapts DeepSeek-OCR-2 model to BaseProvider interface for OCR capabilities.
 """
 
 from typing import Optional
+
+from core.ai.base import ProviderRegistry
 from ...base.providers import BaseProvider, ModelConfig, ModelHandle
 from ...base.providers.registry import ProviderMetadata
-from ...base.providers.registration import register_provider
 
 
 class DeepSeekOCRProviderAdapter(BaseProvider):
@@ -222,8 +223,7 @@ class DeepSeekOCRProviderAdapter(BaseProvider):
             return ""
 
 
-# Register provider (unified: updates both Factory and Registry)
-register_provider(
+ProviderRegistry.register(
     "vlm",
     "deepseek-ocr",
     DeepSeekOCRProviderAdapter,

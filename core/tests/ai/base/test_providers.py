@@ -17,10 +17,8 @@ sys.path.insert(0, str(project_root))
 
 from core.ai.base.providers.base import BaseProvider, ModelHandle
 from core.ai.base.providers.config import ModelConfig, ModelConfigBuilder, ModelType
-from core.ai.base.providers.factory import ProviderFactory
 from core.ai.base.providers.registry import ProviderRegistry, ProviderMetadata
-from core.ai.base.observers.base import Observer
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Observer, Event, EventType
 
 
 class TestModelConfig(unittest.TestCase):
@@ -164,55 +162,55 @@ class TestProviderRegistry(unittest.TestCase):
             provider_name="test_provider",
             capabilities={"chat", "completion"}
         )
-        ProviderRegistry.register("test-llm", metadata)
+        ProviderRegistry.register("llm", "test_provider", BaseProvider, metadata)  # type: ignore[arg-type]
         
-        retrieved = ProviderRegistry.get("test-llm")
+        retrieved = ProviderRegistry.get("llm-test_provider")
         self.assertIsNotNone(retrieved)
         self.assertEqual(retrieved.model_type, "llm")
         self.assertEqual(retrieved.provider_name, "test_provider")
     
     def test_list_all(self):
         """Test listing all providers."""
-        ProviderRegistry.register("p1", ProviderMetadata("llm", "p1", {"chat"}))
-        ProviderRegistry.register("p2", ProviderMetadata("vlm", "p2", {"inference"}))
+        ProviderRegistry.register("llm", "p1", BaseProvider, ProviderMetadata("llm", "p1", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("vlm", "p2", BaseProvider, ProviderMetadata("vlm", "p2", {"inference"}))  # type: ignore[arg-type]
         
         all_providers = ProviderRegistry.list_all()
         self.assertEqual(len(all_providers), 2)
-        self.assertIn("p1", all_providers)
-        self.assertIn("p2", all_providers)
+        self.assertIn("llm-p1", all_providers)
+        self.assertIn("vlm-p2", all_providers)
     
     def test_search_by_type(self):
         """Test searching providers by type."""
-        ProviderRegistry.register("llm1", ProviderMetadata("llm", "llm1", {"chat"}))
-        ProviderRegistry.register("llm2", ProviderMetadata("llm", "llm2", {"completion"}))
-        ProviderRegistry.register("vlm1", ProviderMetadata("vlm", "vlm1", {"inference"}))
+        ProviderRegistry.register("llm", "llm1", BaseProvider, ProviderMetadata("llm", "llm1", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("llm", "llm2", BaseProvider, ProviderMetadata("llm", "llm2", {"completion"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("vlm", "vlm1", BaseProvider, ProviderMetadata("vlm", "vlm1", {"inference"}))  # type: ignore[arg-type]
         
         llm_providers = ProviderRegistry.search(model_type="llm")
         self.assertEqual(len(llm_providers), 2)
-        self.assertIn("llm1", llm_providers)
-        self.assertIn("llm2", llm_providers)
+        self.assertIn("llm-llm1", llm_providers)
+        self.assertIn("llm-llm2", llm_providers)
     
     def test_search_by_capabilities(self):
         """Test searching providers by capabilities."""
-        ProviderRegistry.register("p1", ProviderMetadata("llm", "p1", {"chat", "completion"}))
-        ProviderRegistry.register("p2", ProviderMetadata("llm", "p2", {"chat"}))
-        ProviderRegistry.register("p3", ProviderMetadata("llm", "p3", {"completion"}))
+        ProviderRegistry.register("llm", "p1", BaseProvider, ProviderMetadata("llm", "p1", {"chat", "completion"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("llm", "p2", BaseProvider, ProviderMetadata("llm", "p2", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("llm", "p3", BaseProvider, ProviderMetadata("llm", "p3", {"completion"}))  # type: ignore[arg-type]
         
         # Search for providers with both capabilities
         results = ProviderRegistry.search(model_type="llm", capabilities=["chat", "completion"])
         self.assertEqual(len(results), 1)
-        self.assertIn("p1", results)
+        self.assertIn("llm-p1", results)
         
         # Search for providers with one capability
         results = ProviderRegistry.search(model_type="llm", capabilities=["chat"])
         self.assertEqual(len(results), 2)
-        self.assertIn("p1", results)
-        self.assertIn("p2", results)
+        self.assertIn("llm-p1", results)
+        self.assertIn("llm-p2", results)
     
     def test_get_by_type(self):
         """Test getting providers by type."""
-        ProviderRegistry.register("llm1", ProviderMetadata("llm", "llm1", {"chat"}))
-        ProviderRegistry.register("vlm1", ProviderMetadata("vlm", "vlm1", {"inference"}))
+        ProviderRegistry.register("llm", "llm1", BaseProvider, ProviderMetadata("llm", "llm1", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("vlm", "vlm1", BaseProvider, ProviderMetadata("vlm", "vlm1", {"inference"}))  # type: ignore[arg-type]
         
         llm_metadata = ProviderRegistry.get_by_type("llm")
         self.assertEqual(len(llm_metadata), 1)
@@ -233,18 +231,18 @@ class TestProviderFactory(unittest.TestCase):
                 pass
         
         self.MockProvider = MockProvider
-        ProviderFactory._registry.clear()
+        ProviderRegistry.clear()
     
     def test_register_and_create(self):
         """Test registering and creating providers."""
-        ProviderFactory.register("llm", "mock", self.MockProvider)
+        ProviderRegistry.register("llm", "mock", self.MockProvider, ProviderMetadata("llm", "mock", {"chat"}))  # type: ignore[arg-type]
         
         config = ModelConfig(
             model_type="llm",
             provider="mock",
             model_path="/path"
         )
-        provider = ProviderFactory.create("llm", "mock", config)
+        provider = ProviderRegistry.create("llm", "mock", config)
         
         self.assertIsInstance(provider, self.MockProvider)
         self.assertEqual(provider.config, config)
@@ -258,38 +256,38 @@ class TestProviderFactory(unittest.TestCase):
         )
         
         with self.assertRaises(ValueError) as cm:
-            ProviderFactory.create("llm", "nonexistent", config)
+            ProviderRegistry.create("llm", "nonexistent", config)
         
         self.assertIn("not registered", str(cm.exception))
     
     def test_list_providers(self):
         """Test listing providers."""
-        ProviderFactory.register("llm", "p1", self.MockProvider)
-        ProviderFactory.register("llm", "p2", self.MockProvider)
-        ProviderFactory.register("vlm", "p3", self.MockProvider)
+        ProviderRegistry.register("llm", "p1", self.MockProvider, ProviderMetadata("llm", "p1", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("llm", "p2", self.MockProvider, ProviderMetadata("llm", "p2", {"chat"}))  # type: ignore[arg-type]
+        ProviderRegistry.register("vlm", "p3", self.MockProvider, ProviderMetadata("vlm", "p3", {"inference"}))  # type: ignore[arg-type]
         
-        all_providers = ProviderFactory.list_providers()
+        all_providers = ProviderRegistry.list_providers()
         self.assertEqual(len(all_providers), 3)
         
-        llm_providers = ProviderFactory.list_providers("llm")
+        llm_providers = ProviderRegistry.list_providers("llm")
         self.assertEqual(len(llm_providers), 2)
         self.assertIn("p1", llm_providers)
         self.assertIn("p2", llm_providers)
     
     def test_is_registered(self):
         """Test checking if provider is registered."""
-        ProviderFactory.register("llm", "test", self.MockProvider)
+        ProviderRegistry.register("llm", "test", self.MockProvider, ProviderMetadata("llm", "test", {"chat"}))  # type: ignore[arg-type]
         
-        self.assertTrue(ProviderFactory.is_registered("llm", "test"))
-        self.assertFalse(ProviderFactory.is_registered("llm", "nonexistent"))
+        self.assertTrue(ProviderRegistry.is_registered("llm", "test"))
+        self.assertFalse(ProviderRegistry.is_registered("llm", "nonexistent"))
     
     def test_unregister(self):
         """Test unregistering a provider."""
-        ProviderFactory.register("llm", "test", self.MockProvider)
-        self.assertTrue(ProviderFactory.is_registered("llm", "test"))
+        ProviderRegistry.register("llm", "test", self.MockProvider, ProviderMetadata("llm", "test", {"chat"}))  # type: ignore[arg-type]
+        self.assertTrue(ProviderRegistry.is_registered("llm", "test"))
         
-        ProviderFactory.unregister("llm", "test")
-        self.assertFalse(ProviderFactory.is_registered("llm", "test"))
+        ProviderRegistry.unregister("llm", "test")
+        self.assertFalse(ProviderRegistry.is_registered("llm", "test"))
 
 
 class TestBaseProvider(unittest.TestCase):

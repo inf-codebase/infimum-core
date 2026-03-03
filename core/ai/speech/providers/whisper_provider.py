@@ -5,8 +5,13 @@ Uses OpenAI's Whisper library for transcription.
 """
 
 from typing import Optional
-from ...base.providers.base import BaseProvider, ModelHandle
-from ...base.providers.config import ModelConfig
+from ...base.providers import (
+    BaseProvider,
+    ModelConfig,
+    ModelHandle,
+    ProviderMetadata,
+    ProviderRegistry,
+)
 
 
 class WhisperProvider(BaseProvider):
@@ -143,36 +148,53 @@ class WhisperProvider(BaseProvider):
         handle: ModelHandle,
         audio_path: str,
         language: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         Transcribe audio using Whisper model.
-        
+
         Args:
             handle: Model handle
             audio_path: Path to audio file
             language: Optional language code (e.g., "en", "es")
             **kwargs: Additional Whisper transcribe parameters
-            
+
         Returns:
             Transcribed text
         """
         model = handle.model
-        
+
         # Prepare transcribe options
         transcribe_options = {}
         if language:
             transcribe_options["language"] = language
-        
+
         # Add any extra parameters from config
         if handle.config.extra_params:
             transcribe_options.update(handle.config.extra_params)
-        
+
         # Override with kwargs
         transcribe_options.update(kwargs)
-        
+
         # Transcribe
         result = model.transcribe(audio_path, **transcribe_options)
-        
+
         # Return text
         return result.get("text", "")
+
+
+# Register Whisper provider in the unified registry
+ProviderRegistry.register(
+    model_type="speech",
+    provider_name="whisper",
+    provider_class=WhisperProvider,
+    metadata=ProviderMetadata(
+        model_type="speech",
+        provider_name="whisper",
+        capabilities={"speech_to_text", "transcription"},
+        description=(
+            "OpenAI Whisper provider for general-purpose speech-to-text transcription"
+        ),
+        version="1.0.0",
+    ),
+)

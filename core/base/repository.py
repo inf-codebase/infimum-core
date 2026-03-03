@@ -1,57 +1,76 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+"""
+Repository base that works with any ORM model: one instance, multiple entity types.
+
+Each method takes the model class (and id or payload) so the same repository
+can be used for User, Order, etc. Uses a single session per operation.
+"""
+from typing import Any, Dict, Optional, Type, TypeVar, Union
+
 from pydantic import BaseModel
+
 from core.database.base import DatabaseManager
 
 ModelType = TypeVar("ModelType")
-CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
-UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
-class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, model: Type[ModelType], db: DatabaseManager):
-        self.model = model
+
+class BaseRepository:
+    """
+    Multi-model repository: one instance can perform CRUD on any ORM entity type.
+
+    Pass the model class into each method, e.g. repo.get_by_id(User, 1),
+    repo.create(Order, order_data). Each operation uses a single session.
+    """
+
+    def __init__(self, db: DatabaseManager) -> None:
         self.db = db
 
-    def get_by_id(self, id: Any) -> Optional[ModelType]:
-        """Get a record by ID."""
-        return self.db.query(self.model).filter(self.model.id == id).first()
+    def get_by_id(self, model: Type[ModelType], id_: Any) -> Optional[ModelType]:
+        """Get a record by ID. Uses a single session for the operation."""
+        with self.db.get_session() as session:
+            return session.query(model).filter(model.id == id_).first()
 
-    def create(self, obj_in: CreateSchemaType) -> ModelType:
-        """Create a new record."""
-        # Using model_dump() to get a dict from Pydantic models
-        db_obj = self.model(**obj_in.model_dump())
-        
-        with self.db.get_session() as session:  
+    def create(
+        self,
+        model: Type[ModelType],
+        obj_in: Union[BaseModel, Dict[str, Any]],
+    ) -> ModelType:
+        """Create a new record for the given model."""
+        data = obj_in.model_dump() if isinstance(obj_in, BaseModel) else obj_in
+        db_obj = model(**data)
+        with self.db.get_session() as session:
             session.add(db_obj)
             session.commit()
             session.refresh(db_obj)
         return db_obj
 
-    def update(self, id: Any, obj_in: Union[UpdateSchemaType, Dict[str, Any]]) -> Optional[ModelType]:
-        """Update an existing record."""
-        db_obj = self.get_by_id(id)
-        if not db_obj:
-            return None
-
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-        else:
-            update_data = obj_in.model_dump(exclude_unset=True)
-
-        for field, value in update_data.items():
-            setattr(db_obj, field, value)
-
+    def update(
+        self,
+        model: Type[ModelType],
+        id_: Any,
+        obj_in: Union[BaseModel, Dict[str, Any]],
+    ) -> Optional[ModelType]:
+        """Update an existing record. Load and update run in the same session."""
+        update_data = (
+            obj_in.model_dump(exclude_unset=True)
+            if isinstance(obj_in, BaseModel)
+            else obj_in
+        )
         with self.db.get_session() as session:
+            db_obj = session.query(model).filter(model.id == id_).first()
+            if not db_obj:
+                return None
+            for field, value in update_data.items():
+                setattr(db_obj, field, value)
             session.commit()
             session.refresh(db_obj)
         return db_obj
 
-    def delete(self, id: Any) -> bool:
-        """Delete a record."""
-        db_obj = self.get_by_id(id)
-        if not db_obj:
-            return False
-
+    def delete(self, model: Type[ModelType], id_: Any) -> bool:
+        """Delete a record. Load and delete run in the same session."""
         with self.db.get_session() as session:
+            db_obj = session.query(model).filter(model.id == id_).first()
+            if not db_obj:
+                return False
             session.delete(db_obj)
             session.commit()
         return True

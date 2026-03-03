@@ -6,8 +6,13 @@ Uses Google Health AI's MedASR model for medical transcription.
 
 from typing import Optional
 import numpy as np
-from ...base.providers.base import BaseProvider, ModelHandle
-from ...base.providers.config import ModelConfig
+from ...base.providers import (
+    BaseProvider,
+    ModelConfig,
+    ModelHandle,
+    ProviderMetadata,
+    ProviderRegistry,
+)
 from .medasr_repository import MedASRRepository
 from .transcription_entity import TranscriptionEntity
 
@@ -123,11 +128,11 @@ class MedASRProvider(BaseProvider):
         sample_rate: int = 16000,
         return_confidences: bool = True,
         return_timestamps: bool = False,
-        **kwargs
+        **kwargs,
     ) -> TranscriptionEntity:
         """
         Transcribe audio using MedASR model.
-        
+
         Args:
             handle: Model handle containing MedASRRepository
             audio_array: Audio array (mono, 16kHz)
@@ -135,16 +140,33 @@ class MedASRProvider(BaseProvider):
             return_confidences: Whether to return confidence scores
             return_timestamps: Whether to return timestamps
             **kwargs: Additional parameters (ignored for MedASR)
-            
+
         Returns:
             TranscriptionEntity with transcript and confidence scores
         """
         repository = handle.model
-        
+
         # Use repository's transcribe method
         return repository.transcribe(
             audio_array=audio_array,
             sample_rate=sample_rate,
             return_confidences=return_confidences,
-            return_timestamps=return_timestamps
+            return_timestamps=return_timestamps,
         )
+
+
+# Register MedASR provider in the unified registry
+ProviderRegistry.register(
+    model_type="speech",
+    provider_name="medasr",
+    provider_class=MedASRProvider,
+    metadata=ProviderMetadata(
+        model_type="speech",
+        provider_name="medasr",
+        capabilities={"speech_to_text", "transcription", "medical"},
+        description=(
+            "Google Health MedASR provider for medical speech-to-text transcription"
+        ),
+        version="1.0.0",
+    ),
+)
