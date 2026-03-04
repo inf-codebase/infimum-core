@@ -26,6 +26,7 @@ from ..agent import Agent
 from ..agent.types import AgentConfig, ExecutionContext
 from ..tools import get_default_tools
 from ..memory import MemoryManager
+from core.base.api_router_registry import APIRouterRegistry
 from ..config import get_settings
 from ..utils.logging import get_logger, log_agent_event
 from ..utils.exceptions import handle_agent_error
@@ -345,8 +346,9 @@ def setup_routes(app) -> None:
         """Liveness check for Kubernetes."""
         return {"status": "alive", "timestamp": datetime.now().isoformat()}
     
-    # Add routers to app
-    app.include_router(api_router)
-    app.include_router(health_router)
+    # Register and mount via APIRouterRegistry
+    APIRouterRegistry.register_router(api_router)
+    APIRouterRegistry.register_router(health_router)
+    APIRouterRegistry.include_all(app)
     
     logger.info("API routes setup completed")
