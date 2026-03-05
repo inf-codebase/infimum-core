@@ -325,7 +325,7 @@ class MobileClipProvider(BaseProvider):
 ProviderRegistry.register(
     model_type="vlm",
     provider_name="mobileclip",
-    provider_class=MobileCLIPProvider,
+    provider_class=MobileClipProvider,
     metadata=ProviderMetadata(
         model_type="vlm",
         provider_name="mobileclip",
