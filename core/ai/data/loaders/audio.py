@@ -4,7 +4,7 @@ Audio loader implementation.
 Strategy pattern: Implements BaseLoader for audio data.
 """
 
-from typing import Union
+from typing import Callable, Optional, Union
 from pathlib import Path
 from ...base.data.base import BaseLoader
 from ...base.data.item import DataItem
@@ -17,7 +17,7 @@ class AudioLoader(BaseLoader):
     Loads audio from files.
     """
 
-    def _load(self, source: Union[str, Path]) -> DataItem:
+    def _load(self, source: Union[str, Path], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Load audio data.
 
@@ -46,6 +46,9 @@ class AudioLoader(BaseLoader):
 
             # Load audio using librosa
             audio, sr = librosa.load(str(path), sr=None)
+
+            if data_collator:
+                audio = data_collator(audio)
 
             # Get metadata from soundfile
             info = sf.info(str(path))

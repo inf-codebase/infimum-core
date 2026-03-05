@@ -6,7 +6,7 @@ Template Method Pattern: Common workflow defined in load() with hooks.
 """
 
 from abc import ABC, abstractmethod
-from typing import Union, Any, Optional
+from typing import Callable, Union, Any, Optional
 from pathlib import Path
 from core.engine.design_pattern import Observable, Event, EventType
 from .item import DataItem
@@ -25,19 +25,20 @@ class BaseLoader(ABC, Observable):
         super().__init__()
     
     @abstractmethod
-    def _load(self, source: Union[str, Path, Any]) -> DataItem:
+    def _load(self, source: Union[str, Path, Any], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Load data - strategy-specific implementation.
         
         Args:
             source: Data source (path, URL, stream, etc.)
+            data_collator: Optional data collator function
             
         Returns:
             DataItem: Loaded data item
         """
         pass
     
-    def load(self, source: Union[str, Path, Any]) -> DataItem:
+    def load(self, source: Union[str, Path, Any], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Template method - defines common workflow with hooks.
         
@@ -68,7 +69,7 @@ class BaseLoader(ABC, Observable):
         ))
         
         try:
-            item = self._load(source)
+            item = self._load(source, data_collator)
             
             # Step 4: Post-process (hook)
             item = self._post_process_data(item)

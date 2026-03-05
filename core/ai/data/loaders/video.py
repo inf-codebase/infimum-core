@@ -9,7 +9,7 @@ for AI/processing.
 """
 
 import re
-from typing import Union, List, Optional, Iterator, Tuple
+from typing import Callable, Union, List, Optional, Iterator, Tuple
 
 from pathlib import Path
 from PIL import Image
@@ -202,13 +202,14 @@ class VideoLoader(BaseLoader):
     """
 
     def _load(
-        self, source: Union[str, Path], frame_indices: List[int] = None
+        self, source: Union[str, Path], data_collator: Optional[Callable] = None, frame_indices: List[int] = None
     ) -> DataItem:
         """
         Load video data.
 
         Args:
             source: Video source (file path)
+            data_collator: Optional data collator function
             frame_indices: Optional list of frame indices to load
 
         Returns:
@@ -247,7 +248,10 @@ class VideoLoader(BaseLoader):
                         break
                     # Convert BGR to RGB
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    frames.append(Image.fromarray(frame_rgb))
+                    frame = Image.fromarray(frame_rgb)
+                    if data_collator is not None:
+                        frame = data_collator(frame)
+                    frames.append(frame)
             else:
                 # Load specific frames
                 for idx in frame_indices:
@@ -255,19 +259,11 @@ class VideoLoader(BaseLoader):
                     ret, frame = cap.read()
                     if ret:
                         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        frames.append(Image.fromarray(frame_rgb))
-
+                        frame = Image.fromarray(frame_rgb)
+                        if data_collator is not None:
+                            frame = data_collator(frame)
+                        frames.append(frame)
             cap.release()
-
-            return DataItem(
-                data=frames,
-                data_type="video",
-                source=str(path),
-                metadata={
-                    "frame_count": frame_count,
-                    "loaded_frames": len(frames),
-                    "fps": fps,
-                },
-            )
+            return DataItem(data=frames, data_type="video", source=str(path), metadata={"frame_count": frame_count, "loaded_frames": len(frames), "fps": fps})
         else:
             raise ValueError(f"Unsupported video source type: {type(source)}")

@@ -4,7 +4,7 @@ Text loader implementation.
 Strategy pattern: Implements BaseLoader for text data.
 """
 
-from typing import Union
+from typing import Callable, Optional, Union
 from pathlib import Path
 from ...base.data.base import BaseLoader
 from ...base.data.item import DataItem
@@ -17,7 +17,7 @@ class TextLoader(BaseLoader):
     Loads text from files or strings.
     """
 
-    def _load(self, source: Union[str, Path]) -> DataItem:
+    def _load(self, source: Union[str, Path], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Load text data.
 
@@ -37,6 +37,10 @@ class TextLoader(BaseLoader):
                 # Load from file
                 with open(path, "r", encoding="utf-8") as f:
                     text = f.read()
+
+                if data_collator:
+                    text = data_collator(text)
+
                 return DataItem(
                     data=text,
                     data_type="text",

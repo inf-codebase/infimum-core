@@ -4,7 +4,7 @@ Multimodal loader implementation.
 Strategy pattern: Implements BaseLoader for multimodal data (image + text, etc.).
 """
 
-from typing import Union, Dict, Any
+from typing import Callable, Optional, Union, Dict, Any
 from pathlib import Path
 from ...base.data.base import BaseLoader
 from ...base.data.item import DataItem
@@ -27,7 +27,7 @@ class MultimodalLoader(BaseLoader):
         self._text_loader = TextLoader()
         self._audio_loader = AudioLoader()
 
-    def _load(self, source: Union[str, Path, Dict[str, Any]]) -> DataItem:
+    def _load(self, source: Union[str, Path, Dict[str, Any]], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Load multimodal data.
 
@@ -43,17 +43,17 @@ class MultimodalLoader(BaseLoader):
             metadata = {}
 
             if "image" in source:
-                image_item = self._image_loader.load(source["image"])
+                image_item = self._image_loader.load(source["image"], data_collator)
                 modalities["image"] = image_item.data
                 metadata["image"] = image_item.metadata
 
             if "text" in source:
-                text_item = self._text_loader.load(source["text"])
+                text_item = self._text_loader.load(source["text"], data_collator)
                 modalities["text"] = text_item.data
                 metadata["text"] = text_item.metadata
 
             if "audio" in source:
-                audio_item = self._audio_loader.load(source["audio"])
+                audio_item = self._audio_loader.load(source["audio"], data_collator)
                 modalities["audio"] = audio_item.data
                 metadata["audio"] = audio_item.metadata
 
