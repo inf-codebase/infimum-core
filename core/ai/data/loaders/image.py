@@ -4,7 +4,7 @@ Image loader implementation.
 Strategy pattern: Implements BaseLoader for image data.
 """
 
-from typing import Union
+from typing import Callable, Optional, Union
 from pathlib import Path
 from PIL import Image
 import numpy as np
@@ -19,7 +19,7 @@ class ImageLoader(BaseLoader):
     Loads images from files, PIL Images, or numpy arrays.
     """
 
-    def _load(self, source: Union[str, Path, Image.Image, np.ndarray]) -> DataItem:
+    def _load(self, source: Union[str, Path, Image.Image, np.ndarray], data_collator: Optional[Callable] = None) -> DataItem:
         """
         Load image data.
 
@@ -32,6 +32,10 @@ class ImageLoader(BaseLoader):
         if isinstance(source, (str, Path)):
             # Load from file
             image = Image.open(source).convert("RGB")
+
+            if data_collator:
+                image = data_collator(image)
+
             return DataItem(
                 data=image,
                 data_type="image",
@@ -40,12 +44,16 @@ class ImageLoader(BaseLoader):
                     "format": image.format,
                     "size": image.size,
                     "mode": image.mode,
-                },
+                },  
             )
         elif isinstance(source, Image.Image):
             # Already a PIL Image
             if source.mode != "RGB":
                 source = source.convert("RGB")
+
+            if data_collator:
+                source = data_collator(source)
+
             return DataItem(
                 data=source,
                 data_type="image",
@@ -64,6 +72,10 @@ class ImageLoader(BaseLoader):
                 )
             else:
                 image = Image.fromarray(source)
+                
+            if data_collator:
+                image = data_collator(image)
+
             return DataItem(
                 data=image.convert("RGB"),
                 data_type="image",
