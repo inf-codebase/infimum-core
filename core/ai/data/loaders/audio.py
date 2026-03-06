@@ -4,7 +4,7 @@ Audio loader implementation.
 Strategy pattern: Implements BaseLoader for audio data.
 """
 
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List
 from pathlib import Path
 from ...base.data.base import BaseLoader
 from ...base.data.item import DataItem
@@ -17,13 +17,14 @@ class AudioLoader(BaseLoader):
     Loads audio from files.
     """
 
-    def _load(self, source: Union[str, Path], data_collator: Optional[Callable] = None) -> DataItem:
+    def _load(self, source: Union[str, Path], data_collator: Optional[Callable] = None, frame_indices: Optional[List[int]] = None) -> DataItem:
         """
         Load audio data.
 
         Args:
             source: Audio source (file path)
-
+            data_collator: Optional data collator function
+            frame_indices: Optional list of frame indices to load (for video loading)
         Returns:
             DataItem: Loaded audio data
         """

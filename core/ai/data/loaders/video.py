@@ -202,14 +202,17 @@ class VideoLoader(BaseLoader):
     """
 
     def _load(
-        self, source: Union[str, Path], data_collator: Optional[Callable] = None, frame_indices: List[int] = None
+        self, source: Union[str, Path], data_collator: Optional[Union[Callable, dict]] = None, frame_indices: List[int] = None
     ) -> DataItem:
         """
-        Load video data.
+        Load video data with support for batch processing.
 
         Args:
             source: Video source (file path)
-            data_collator: Optional data collator function
+            data_collator: Optional collator - can be:
+                - Callable: Process frames one-by-one (backward compatible)
+                - Dict: {"batch_fn": callable, "batch_size": int} for batch processing
+                - None: Return PIL images without processing
             frame_indices: Optional list of frame indices to load
 
         Returns:
@@ -239,6 +242,12 @@ class VideoLoader(BaseLoader):
             frames = []
             frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             fps = cap.get(cv2.CAP_PROP_FPS)
+            
+            # Determine processing mode
+            is_batch_mode = isinstance(data_collator, dict) and "batch_fn" in data_collator
+            batch_fn = data_collator.get("batch_fn") if is_batch_mode else None
+            batch_size = data_collator.get("batch_size", 16) if is_batch_mode else None
+            single_fn = data_collator if callable(data_collator) else None
 
             if frame_indices is None:
                 # Load all frames
@@ -249,20 +258,38 @@ class VideoLoader(BaseLoader):
                     # Convert BGR to RGB
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frame = Image.fromarray(frame_rgb)
-                    if data_collator is not None:
-                        frame = data_collator(frame)
+                    if single_fn:
+                        frame = single_fn(frame)
                     frames.append(frame)
             else:
                 # Load specific frames
-                for idx in frame_indices:
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                    ret, frame = cap.read()
-                    if ret:
-                        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        frame = Image.fromarray(frame_rgb)
-                        if data_collator is not None:
-                            frame = data_collator(frame)
-                        frames.append(frame)
+                if is_batch_mode:
+                    # Batch mode: accumulate PIL images, process in batches
+                    pil_frames = []
+                    for idx in frame_indices:
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                        ret, frame = cap.read()
+                        if ret:
+                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            pil_frames.append(Image.fromarray(frame_rgb))
+                    
+                    # Process accumulated frames in batches
+                    for batch_start in range(0, len(pil_frames), batch_size):
+                        batch_end = min(batch_start + batch_size, len(pil_frames))
+                        batch = pil_frames[batch_start:batch_end]
+                        processed_batch = batch_fn(batch)  # Returns list of features
+                        frames.extend(processed_batch)
+                else:
+                    # Single-frame mode (backward compatible)
+                    for idx in frame_indices:
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                        ret, frame = cap.read()
+                        if ret:
+                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            frame = Image.fromarray(frame_rgb)
+                            if single_fn:
+                                frame = single_fn(frame)
+                            frames.append(frame)
             cap.release()
             return DataItem(data=frames, data_type="video", source=str(path), metadata={"frame_count": frame_count, "loaded_frames": len(frames), "fps": fps})
         else:
