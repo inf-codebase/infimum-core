@@ -14,6 +14,7 @@ class ModelType(str, Enum):
     LLM = "llm"
     VLM = "vlm"
     SPEECH = "speech"
+    EMBEDDING = "embedding"
 
 
 @dataclass
