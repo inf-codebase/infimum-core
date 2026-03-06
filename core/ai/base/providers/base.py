@@ -9,8 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from dataclasses import dataclass, field
 from .config import ModelConfig
-from ..observers.base import Observable
-from ..observers.events import Event, EventType
+from core.engine.design_pattern import Observable, Event, EventType
 
 
 @dataclass
@@ -131,18 +130,8 @@ class BaseProvider(ABC, Observable):
             raise
     
     def _validate_config(self, config: ModelConfig) -> None:
-        """
-        Validate configuration - common step, can be overridden.
-        
-        Args:
-            config: Configuration to validate
-            
-        Raises:
-            ValueError: If configuration is invalid
-        """
-        # Accept either model_path or model_name for flexibility
-        if not config.model_path and not config.model_name:
-            raise ValueError("Either model_path or model_name is required")
+
+        config.validate()
     
     def _is_cached(self, config: ModelConfig) -> bool:
         """

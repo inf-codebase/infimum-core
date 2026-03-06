@@ -5,7 +5,7 @@ Tests how different patterns work together.
 """
 
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 import sys
 from pathlib import Path
@@ -16,7 +16,6 @@ sys.path.insert(0, str(project_root))
 
 from core.ai.base.providers.base import BaseProvider, ModelHandle
 from core.ai.base.providers.config import ModelConfig, ModelConfigBuilder
-from core.ai.base.providers.factory import ProviderFactory
 from core.ai.base.providers.registry import ProviderRegistry, ProviderMetadata
 
 from core.ai.base.data.base import BaseLoader
@@ -25,10 +24,8 @@ from core.ai.base.data.factory import LoaderFactory
 
 from core.ai.base.preprocessing.base import BaseTransform
 from core.ai.base.preprocessing.pipeline import TransformPipeline
-from core.ai.base.preprocessing.factory import TransformFactory
 
-from core.ai.base.observers.base import Observer, Observable
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Observer, Event, EventType
 
 
 class TestProviderDataIntegration(unittest.TestCase):
@@ -60,13 +57,12 @@ class TestProviderDataIntegration(unittest.TestCase):
         self.MockLoader = MockLoader
         
         # Clear registries
-        ProviderFactory._registry.clear()
-        LoaderFactory._registry.clear()
+        ProviderRegistry.clear()
     
     def test_provider_with_loader(self):
         """Test using provider with data loader."""
         # Register components
-        ProviderFactory.register("llm", "mock", self.MockProvider)
+        ProviderRegistry.register("llm", "mock", self.MockProvider, ProviderMetadata("llm", "mock", {"chat"}))
         LoaderFactory.register("test", self.MockLoader)
         
         # Create components using factories
@@ -76,7 +72,7 @@ class TestProviderDataIntegration(unittest.TestCase):
             .with_model_path("/path")
             .build())
         
-        provider = ProviderFactory.create("llm", "mock", config)
+        provider = ProviderRegistry.create("llm", "mock", config)
         loader = LoaderFactory.create("test")
         
         # Use together
@@ -117,7 +113,6 @@ class TestDataPreprocessingIntegration(unittest.TestCase):
         self.MultiplyTwo = MultiplyTwoTransform
         
         LoaderFactory._registry.clear()
-        TransformFactory._registry.clear()
     
     def test_loader_with_pipeline(self):
         """Test using loader with preprocessing pipeline."""
@@ -136,20 +131,6 @@ class TestDataPreprocessingIntegration(unittest.TestCase):
         # (5 + 1) * 2 = 12
         self.assertEqual(processed.data, 12)
     
-    def test_loader_with_factory_pipeline(self):
-        """Test using loader with factory-created pipeline."""
-        LoaderFactory.register("test", self.MockLoader)
-        TransformFactory.register("add1", self.AddOne)
-        TransformFactory.register("mul2", self.MultiplyTwo)
-        
-        loader = LoaderFactory.create("test")
-        pipeline = TransformFactory.create_pipeline(["add1", "mul2"])
-        
-        data_item = loader.load("source")
-        processed = pipeline.apply(data_item)
-        
-        self.assertEqual(processed.data, 12)
-
 
 class TestObserverIntegration(unittest.TestCase):
     """Test observer integration with providers and loaders."""
@@ -254,16 +235,14 @@ class TestFullWorkflow(unittest.TestCase):
         self.ProcessTransform = ProcessTransform
         
         # Clear registries
-        ProviderFactory._registry.clear()
+        ProviderRegistry.clear()
         LoaderFactory._registry.clear()
-        TransformFactory._registry.clear()
     
     def test_complete_workflow(self):
         """Test complete workflow: config -> provider -> loader -> preprocessing."""
         # Register components
-        ProviderFactory.register("llm", "mock", self.MockProvider)
+        ProviderRegistry.register("llm", "mock", self.MockProvider, ProviderMetadata("llm", "mock", {"chat"}))
         LoaderFactory.register("text", self.MockLoader)
-        TransformFactory.register("process", self.ProcessTransform)
         
         # Build configuration
         config = (ModelConfigBuilder()
@@ -274,9 +253,8 @@ class TestFullWorkflow(unittest.TestCase):
             .build())
         
         # Create components
-        provider = ProviderFactory.create("llm", "mock", config)
+        provider = ProviderRegistry.create("llm", "mock", config)
         loader = LoaderFactory.create("text")
-        pipeline = TransformFactory.create_pipeline(["process"])
         
         # Execute workflow
         # 1. Load data
@@ -284,7 +262,7 @@ class TestFullWorkflow(unittest.TestCase):
         self.assertEqual(data_item.data, "raw_data")
         
         # 2. Preprocess
-        processed_item = pipeline.apply(data_item)
+        processed_item = self.ProcessTransform().transform(data_item)
         self.assertEqual(processed_item.data, "processed_raw_data")
         self.assertTrue(processed_item.metadata.get("processed", False))
         
@@ -297,6 +275,3 @@ class TestFullWorkflow(unittest.TestCase):
         self.assertIsNotNone(processed_item)
         self.assertIsNotNone(handle)
 
-
-if __name__ == '__main__':
-    unittest.main()

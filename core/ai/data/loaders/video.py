@@ -9,12 +9,12 @@ for AI/processing.
 """
 
 import re
-from typing import Union, List, Optional, Iterator, Tuple
+from typing import Callable, Union, List, Optional, Iterator, Tuple
 
 from pathlib import Path
 from PIL import Image
-from ...core.data.base import BaseLoader
-from ...core.data.item import DataItem
+from core.ai.base import BaseLoader
+from core.ai.base.data import DataItem
 
 
 # --- VideoStreamer helpers (stdlib only) ---
@@ -197,18 +197,24 @@ class VideoStreamer:
 class VideoLoader(BaseLoader):
     """
     Video data loader.
-    
+
     Loads video frames from files.
     """
-    
-    def _load(self, source: Union[str, Path], frame_indices: List[int] = None) -> DataItem:
+
+    def _load(
+        self, source: Union[str, Path], data_collator: Optional[Union[Callable, dict]] = None, frame_indices: List[int] = None
+    ) -> DataItem:
         """
-        Load video data.
-        
+        Load video data with support for batch processing.
+
         Args:
             source: Video source (file path)
+            data_collator: Optional collator - can be:
+                - Callable: Process frames one-by-one (backward compatible)
+                - Dict: {"batch_fn": callable, "batch_size": int} for batch processing
+                - None: Return PIL images without processing
             frame_indices: Optional list of frame indices to load
-            
+
         Returns:
             DataItem: Loaded video data (list of frames)
         """
@@ -219,24 +225,30 @@ class VideoLoader(BaseLoader):
                 "Video loading requires opencv-python. "
                 "Install with: pip install opencv-python"
             )
-        
+
         if isinstance(source, Path):
             source = str(source)
-        
+
         if isinstance(source, str):
             path = Path(source)
             if not path.exists():
                 raise FileNotFoundError(f"Video file not found: {source}")
-            
+
             # Open video
             cap = cv2.VideoCapture(str(path))
             if not cap.isOpened():
                 raise ValueError(f"Could not open video file: {source}")
-            
+
             frames = []
             frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             fps = cap.get(cv2.CAP_PROP_FPS)
             
+            # Determine processing mode
+            is_batch_mode = isinstance(data_collator, dict) and "batch_fn" in data_collator
+            batch_fn = data_collator.get("batch_fn") if is_batch_mode else None
+            batch_size = data_collator.get("batch_size", 16) if is_batch_mode else None
+            single_fn = data_collator if callable(data_collator) else None
+
             if frame_indices is None:
                 # Load all frames
                 while True:
@@ -245,27 +257,40 @@ class VideoLoader(BaseLoader):
                         break
                     # Convert BGR to RGB
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    frames.append(Image.fromarray(frame_rgb))
+                    frame = Image.fromarray(frame_rgb)
+                    if single_fn:
+                        frame = single_fn(frame)
+                    frames.append(frame)
             else:
                 # Load specific frames
-                for idx in frame_indices:
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                    ret, frame = cap.read()
-                    if ret:
-                        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        frames.append(Image.fromarray(frame_rgb))
-            
+                if is_batch_mode:
+                    # Batch mode: accumulate PIL images, process in batches
+                    pil_frames = []
+                    for idx in frame_indices:
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                        ret, frame = cap.read()
+                        if ret:
+                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            pil_frames.append(Image.fromarray(frame_rgb))
+                    
+                    # Process accumulated frames in batches
+                    for batch_start in range(0, len(pil_frames), batch_size):
+                        batch_end = min(batch_start + batch_size, len(pil_frames))
+                        batch = pil_frames[batch_start:batch_end]
+                        processed_batch = batch_fn(batch)  # Returns list of features
+                        frames.extend(processed_batch)
+                else:
+                    # Single-frame mode (backward compatible)
+                    for idx in frame_indices:
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                        ret, frame = cap.read()
+                        if ret:
+                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            frame = Image.fromarray(frame_rgb)
+                            if single_fn:
+                                frame = single_fn(frame)
+                            frames.append(frame)
             cap.release()
-            
-            return DataItem(
-                data=frames,
-                data_type="video",
-                source=str(path),
-                metadata={
-                    "frame_count": frame_count,
-                    "loaded_frames": len(frames),
-                    "fps": fps,
-                }
-            )
+            return DataItem(data=frames, data_type="video", source=str(path), metadata={"frame_count": frame_count, "loaded_frames": len(frames), "fps": fps})
         else:
             raise ValueError(f"Unsupported video source type: {type(source)}")

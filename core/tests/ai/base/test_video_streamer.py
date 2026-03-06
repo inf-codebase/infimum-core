@@ -42,7 +42,6 @@ if "core.ai.speech" not in sys.modules:
     sys.modules["core.ai.speech.models.text2speech"] = speech.models.text2speech
 
 # Loaders use "...core.data.base" (core.ai.core.data); alias to core.ai.base.data
-import core.ai.base  # noqa: E402
 sys.modules["core.ai.core"] = sys.modules["core.ai.base"]
 
 from core.ai.data.loaders.video import (

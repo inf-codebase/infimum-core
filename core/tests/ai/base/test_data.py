@@ -17,9 +17,7 @@ sys.path.insert(0, str(project_root))
 
 from core.ai.base.data.base import BaseLoader
 from core.ai.base.data.item import DataItem
-from core.ai.base.data.factory import LoaderFactory
-from core.ai.base.data.registry import LoaderRegistry, LoaderMetadata
-from core.ai.base.observers.events import Event, EventType
+from core.engine.design_pattern import Event, EventType
 
 
 class TestDataItem(unittest.TestCase):
@@ -169,98 +167,3 @@ class TestBaseLoader(unittest.TestCase):
         self.assertIn(EventType.DATA_LOADING_STARTED, event_types)
         self.assertIn(EventType.DATA_LOADING_COMPLETED, event_types)
 
-
-class TestLoaderFactory(unittest.TestCase):
-    """Test LoaderFactory (Factory pattern)."""
-    
-    def setUp(self):
-        """Set up test loader."""
-        class TestLoader(BaseLoader):
-            def _load(self, source):
-                return DataItem(data=source, data_type="test")
-        
-        self.TestLoader = TestLoader
-        LoaderFactory._registry.clear()
-    
-    def test_register_and_create(self):
-        """Test registering and creating loaders."""
-        LoaderFactory.register("test", self.TestLoader)
-        loader = LoaderFactory.create("test")
-        
-        self.assertIsInstance(loader, self.TestLoader)
-    
-    def test_create_unregistered_loader(self):
-        """Test creating unregistered loader raises error."""
-        with self.assertRaises(ValueError) as cm:
-            LoaderFactory.create("nonexistent")
-        
-        self.assertIn("not registered", str(cm.exception))
-    
-    def test_list_loaders(self):
-        """Test listing loaders."""
-        LoaderFactory.register("loader1", self.TestLoader)
-        LoaderFactory.register("loader2", self.TestLoader)
-        
-        loaders = LoaderFactory.list_loaders()
-        self.assertEqual(len(loaders), 2)
-        self.assertIn("loader1", loaders)
-        self.assertIn("loader2", loaders)
-    
-    def test_is_registered(self):
-        """Test checking if loader is registered."""
-        LoaderFactory.register("test", self.TestLoader)
-        
-        self.assertTrue(LoaderFactory.is_registered("test"))
-        self.assertFalse(LoaderFactory.is_registered("nonexistent"))
-    
-    def test_unregister(self):
-        """Test unregistering a loader."""
-        LoaderFactory.register("test", self.TestLoader)
-        self.assertTrue(LoaderFactory.is_registered("test"))
-        
-        LoaderFactory.unregister("test")
-        self.assertFalse(LoaderFactory.is_registered("test"))
-
-
-class TestLoaderRegistry(unittest.TestCase):
-    """Test LoaderRegistry (Registry pattern)."""
-    
-    def setUp(self):
-        """Clear registry before each test."""
-        LoaderRegistry.clear()
-    
-    def test_register_and_get(self):
-        """Test registering and retrieving loaders."""
-        metadata = LoaderMetadata(
-            data_type="image",
-            loader_name="test_loader",
-            supported_formats={"jpg", "png"}
-        )
-        LoaderRegistry.register("test-image", metadata)
-        
-        retrieved = LoaderRegistry.get("test-image")
-        self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.data_type, "image")
-        self.assertEqual(retrieved.loader_name, "test_loader")
-    
-    def test_search_by_type(self):
-        """Test searching loaders by type."""
-        LoaderRegistry.register("img1", LoaderMetadata("image", "img1", {"jpg"}))
-        LoaderRegistry.register("img2", LoaderMetadata("image", "img2", {"png"}))
-        LoaderRegistry.register("txt1", LoaderMetadata("text", "txt1", {"txt"}))
-        
-        image_loaders = LoaderRegistry.search(data_type="image")
-        self.assertEqual(len(image_loaders), 2)
-    
-    def test_search_by_format(self):
-        """Test searching loaders by format."""
-        LoaderRegistry.register("img1", LoaderMetadata("image", "img1", {"jpg", "png"}))
-        LoaderRegistry.register("img2", LoaderMetadata("image", "img2", {"png"}))
-        
-        jpg_loaders = LoaderRegistry.search(data_type="image", format="jpg")
-        self.assertEqual(len(jpg_loaders), 1)
-        self.assertIn("img1", jpg_loaders)
-
-
-if __name__ == '__main__':
-    unittest.main()

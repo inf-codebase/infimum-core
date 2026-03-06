@@ -2,7 +2,6 @@
 
 from .base import BaseProvider, ModelConfig, ModelHandle
 from .registry import ProviderRegistry, ProviderMetadata
-from .factory import ProviderFactory
 from .config import ModelConfigBuilder
 
 __all__ = [
@@ -11,6 +10,5 @@ __all__ = [
     "ModelHandle",
     "ProviderRegistry",
     "ProviderMetadata",
-    "ProviderFactory",
     "ModelConfigBuilder",
 ]

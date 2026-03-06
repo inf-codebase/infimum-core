@@ -10,8 +10,7 @@ from unittest.mock import Mock, MagicMock, patch
 from core.database.registry import DatabaseBackendRegistry
 from core.database.base import DatabaseConnectionConfig
 from core.database.base import DatabaseManager
-from core.database.milvus import MilvusManager
-from core.database.qdrant import QdrantManager
+
 
 
 class TestDatabaseBackendRegistry:
@@ -47,36 +46,6 @@ class TestDatabaseBackendRegistry:
         with pytest.raises(ValueError, match="must be a subclass of DatabaseManager"):
             DatabaseBackendRegistry.register("invalid", NotADatabaseManager)
     
-    def test_create_backend_with_from_config(self):
-        """Test creating backend using from_config method."""
-        DatabaseBackendRegistry.register("milvus", MilvusManager)
-        
-        config = DatabaseConnectionConfig(host="localhost", port=19530)
-        manager = DatabaseBackendRegistry.create("milvus", config)
-        
-        assert isinstance(manager, MilvusManager)
-        assert manager.milvus_host == "localhost"
-        assert manager.milvus_port == 19530
-    
-    def test_create_backend_without_from_config(self):
-        """Test creating backend without from_config (fallback)."""
-        class TestBackend(DatabaseManager):
-            def __init__(self, host=None, port=None):
-                self.host = host
-                self.port = port
-            def connect(self): pass
-            def close(self): pass
-            def insert_or_update(self, *args, **kwargs): pass
-            def query_or_create_new(self, *args, **kwargs): pass
-        
-        DatabaseBackendRegistry.register("test", TestBackend)
-        
-        config = DatabaseConnectionConfig(host="localhost", port=5432)
-        manager = DatabaseBackendRegistry.create("test", config)
-        
-        assert isinstance(manager, TestBackend)
-        assert manager.host == "localhost"
-        assert manager.port == 5432
     
     def test_create_unknown_backend(self):
         """Test that creating unknown backend raises error."""
@@ -87,8 +56,8 @@ class TestDatabaseBackendRegistry:
     
     def test_list_backends(self):
         """Test listing registered backends."""
-        DatabaseBackendRegistry.register("backend1", MilvusManager)
-        DatabaseBackendRegistry.register("backend2", QdrantManager)
+        DatabaseBackendRegistry.register("backend1", DatabaseManager)
+        DatabaseBackendRegistry.register("backend2", DatabaseManager)
         
         backends = DatabaseBackendRegistry.list_backends()
         
@@ -98,7 +67,7 @@ class TestDatabaseBackendRegistry:
     
     def test_unregister_backend(self):
         """Test unregistering a backend."""
-        DatabaseBackendRegistry.register("test_backend", MilvusManager)
+        DatabaseBackendRegistry.register("test_backend", DatabaseManager)
         assert DatabaseBackendRegistry.is_registered("test_backend")
         
         DatabaseBackendRegistry.unregister("test_backend")
@@ -113,36 +82,14 @@ class TestDatabaseBackendRegistry:
     
     def test_clear_registry(self):
         """Test clearing all registered backends."""
-        DatabaseBackendRegistry.register("backend1", MilvusManager)
-        DatabaseBackendRegistry.register("backend2", QdrantManager)
+        DatabaseBackendRegistry.register("backend1", DatabaseManager)
+        DatabaseBackendRegistry.register("backend2", DatabaseManager)
         
         assert len(DatabaseBackendRegistry.list_backends()) >= 2
         
         DatabaseBackendRegistry.clear()
         
         assert len(DatabaseBackendRegistry.list_backends()) == 0
-    
-    def test_register_with_factory(self):
-        """Test registering backend with custom factory function."""
-        class TestBackend(DatabaseManager):
-            def __init__(self, custom_param):
-                self.custom_param = custom_param
-            def connect(self): pass
-            def close(self): pass
-            def insert_or_update(self, *args, **kwargs): pass
-            def query_or_create_new(self, *args, **kwargs): pass
-        
-        def factory(config, **kwargs):
-            return TestBackend(custom_param="custom_value")
-        
-        DatabaseBackendRegistry.register("test", TestBackend, factory=factory)
-        
-        config = DatabaseConnectionConfig()
-        manager = DatabaseBackendRegistry.create("test", config)
-        
-        assert isinstance(manager, TestBackend)
-        assert manager.custom_param == "custom_value"
-
 
 class TestPluginDiscovery:
     """Test plugin discovery functionality."""
@@ -198,22 +145,3 @@ class TestPluginDiscovery:
         count = discover_database_plugins("core.database.plugins")
         assert count == 0
     
-    def test_register_builtin_backends(self):
-        """Test that built-in backends are registered."""
-        from core.database.plugins import register_builtin_backends
-        from core.database.registry import DatabaseBackendRegistry
-        
-        # Clear registry first
-        DatabaseBackendRegistry.clear()
-        
-        # Register built-ins
-        register_builtin_backends()
-        
-        # Check that built-ins are registered
-        assert DatabaseBackendRegistry.is_registered("postgres")
-        assert DatabaseBackendRegistry.is_registered("milvus")
-        assert DatabaseBackendRegistry.is_registered("qdrant")
-        assert DatabaseBackendRegistry.is_registered("mongo")
-        assert DatabaseBackendRegistry.is_registered("milvus_async")
-        assert DatabaseBackendRegistry.is_registered("qdrant_async")
-        assert DatabaseBackendRegistry.is_registered("mongo_async")

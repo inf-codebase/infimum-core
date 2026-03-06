@@ -19,10 +19,11 @@ class ModelType(str, Enum):
 
 @dataclass
 class ModelConfig:
-    """Model configuration."""
+    """Model configuration.
+    """
     model_type: str
     provider: str
-    model_path: str
+    model_path: Optional[str] = None
     model_base: Optional[str] = None
     model_name: Optional[str] = None
     device: Optional[str] = None
@@ -31,22 +32,25 @@ class ModelConfig:
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
     extra_params: Dict[str, Any] = field(default_factory=dict)
-    
+
     def validate(self) -> None:
         """Validate configuration."""
-        if not self.model_path:
-            raise ValueError("model_path is required")
         if not self.model_type:
             raise ValueError("model_type is required")
         if not self.provider:
             raise ValueError("provider is required")
-    
+        if not self.model_path and not self.model_name:
+            raise ValueError(
+                "At least one of model_path or model_name must be provided"
+            )
+
     def __hash__(self) -> int:
         """Make config hashable."""
         return hash((
             self.model_type,
             self.provider,
             self.model_path,
+            self.model_name,
             self.model_base,
             self.device,
             self.load_8bit,
@@ -62,7 +66,6 @@ class ModelConfigBuilder:
         self._config = ModelConfig(
             model_type="",
             provider="",
-            model_path=""
         )
     
     def with_model_type(self, model_type: str) -> 'ModelConfigBuilder':

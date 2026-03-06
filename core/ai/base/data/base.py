@@ -6,10 +6,9 @@ Template Method Pattern: Common workflow defined in load() with hooks.
 """
 
 from abc import ABC, abstractmethod
-from typing import Union, Any, Optional
+from typing import Callable, Union, Any, Optional, List
 from pathlib import Path
-from ..observers.base import Observable
-from ..observers.events import Event, EventType
+from core.engine.design_pattern import Observable, Event, EventType
 from .item import DataItem
 
 
@@ -26,19 +25,20 @@ class BaseLoader(ABC, Observable):
         super().__init__()
     
     @abstractmethod
-    def _load(self, source: Union[str, Path, Any]) -> DataItem:
+    def _load(self, source: Union[str, Path, Any], data_collator: Optional[Callable] = None, frame_indices: List[int] = None) -> DataItem:
         """
         Load data - strategy-specific implementation.
         
         Args:
             source: Data source (path, URL, stream, etc.)
-            
+            data_collator: Optional data collator function
+            frame_indices: Optional list of frame indices to load (for video loading)
         Returns:
             DataItem: Loaded data item
         """
         pass
     
-    def load(self, source: Union[str, Path, Any]) -> DataItem:
+    def load(self, source: Union[str, Path, Any], data_collator: Optional[Callable] = None, frame_indices: List[int] = None) -> DataItem:
         """
         Template method - defines common workflow with hooks.
         
@@ -51,7 +51,8 @@ class BaseLoader(ABC, Observable):
         
         Args:
             source: Data source
-            
+            data_collator: Optional data collator function
+            frame_indices: Optional list of frame indices to load (for video loading)
         Returns:
             DataItem: Loaded data item
         """
@@ -69,7 +70,7 @@ class BaseLoader(ABC, Observable):
         ))
         
         try:
-            item = self._load(source)
+            item = self._load(source, data_collator, frame_indices)
             
             # Step 4: Post-process (hook)
             item = self._post_process_data(item)
