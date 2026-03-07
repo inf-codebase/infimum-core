@@ -77,7 +77,10 @@ def __getattr__(name):
     """
     value = os.getenv(name, None)
     # Cache the value in the module for future access
-    setattr(this_module, name, value)
+    if value is not None:
+        setattr(this_module, name, value)
+    else:
+        raise AttributeError(f"Config variable: {name} not found in the system environment")
     return value
 
 def get_random_config(config_values):
@@ -132,12 +135,4 @@ def _detect_gpu_config():
 
 
 # Initialize GPU configuration at module load time
-CUDA_AVAILABLE, GPU_COUNT, CUDA_VERSION, MPS_AVAILABLE = _detect_gpu_config()
-
-# Convenience attributes
-HAS_GPU = CUDA_AVAILABLE
-NUM_GPUS = GPU_COUNT
-HAS_MPS = MPS_AVAILABLE
-
-# Determine if we have any hardware acceleration
-HAS_ACCELERATION = CUDA_AVAILABLE or MPS_AVAILABLE
+GPU_CUDA_AVAILABLE, GPU_CUDA_COUNT, GPU_CUDA_VERSION, GPU_MPS_AVAILABLE = _detect_gpu_config()
