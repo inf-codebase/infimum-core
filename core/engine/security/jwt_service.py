@@ -12,6 +12,7 @@ from loguru import logger
 from .types import UserData, TokenPayload, TokenResponse, AuthResult
 from .password import PasswordService, get_password_service
 from .token_blacklist import TokenBlacklistService, get_token_blacklist_service
+from core.base.entity import BaseEntity
 
 # Lazy import jose to avoid loading when not needed
 _jwt = None
@@ -35,18 +36,42 @@ def _get_jwt_error():
     return _JWTError
 
 
+def _extract_user_field(user_data: Union[Dict[str, Any], UserData, BaseEntity], field: str, default: Any = None) -> Any:
+    """
+    Extract a field from user_data, whether it's a dict, TypedDict, or BaseEntity.
+    
+    Args:
+        user_data: User data as dictionary or BaseEntity instance
+        field: Field name to extract
+        default: Default value if field not found
+        
+    Returns:
+        Field value or default
+    """
+    if isinstance(user_data, dict):
+        return user_data.get(field, default)
+    else:
+        # Handle BaseEntity or any object with attributes
+        return getattr(user_data, field, default)
+
+
 class JWTService:
     """Service for handling JWT token operations.
     
-    Creates access and refresh tokens from user data dictionaries,
+    Creates access and refresh tokens from user data (dictionaries or BaseEntity instances),
     verifies tokens, and integrates with the blacklist service.
     
     Example:
         service = JWTService()
         
+        # Using dictionary
         user_data = {"id": 1, "username": "john", "email": "john@example.com"}
         access_token = service.create_access_token(user_data)
         refresh_token = service.create_refresh_token(user_data)
+        
+        # Using BaseEntity (SQLAlchemy model)
+        user_entity = User(id=1, username="john", email="john@example.com")
+        access_token = service.create_access_token(user_entity)
         
         payload = service.get_user_from_token(access_token)
         service.blacklist_token(access_token)  # On logout
@@ -152,14 +177,14 @@ class JWTService:
     
     def create_access_token(
         self,
-        user_data: Union[Dict[str, Any], UserData],
+        user_data: Union[Dict[str, Any], UserData, BaseEntity],
         expires_delta: Optional[timedelta] = None
     ) -> str:
         """
         Create an access token for the user.
         
         Args:
-            user_data: Dictionary containing user information (id, username, email, role)
+            user_data: Dictionary or BaseEntity containing user information (id, username, email, role)
             expires_delta: Optional custom expiration time
             
         Returns:
@@ -176,11 +201,11 @@ class JWTService:
         iat_time = datetime.now(timezone.utc)
         
         # Extract user fields with defaults
-        user_id = str(user_data.get('id', ''))
-        username = user_data.get('username', '')
-        email = user_data.get('email', '')
-        role = user_data.get('role', '')
-        roles = user_data.get('roles', [])
+        user_id = str(_extract_user_field(user_data, 'id', ''))
+        username = _extract_user_field(user_data, 'username', '')
+        email = _extract_user_field(user_data, 'email', '')
+        role = _extract_user_field(user_data, 'role', '')
+        roles = _extract_user_field(user_data, 'roles', [])
         
         # Build payload
         to_encode: Dict[str, Any] = {
@@ -205,14 +230,14 @@ class JWTService:
     
     def create_refresh_token(
         self,
-        user_data: Union[Dict[str, Any], UserData],
+        user_data: Union[Dict[str, Any], UserData, BaseEntity],
         expires_delta: Optional[timedelta] = None
     ) -> str:
         """
         Create a refresh token for the user.
         
         Args:
-            user_data: Dictionary containing user information
+            user_data: Dictionary or BaseEntity containing user information
             expires_delta: Optional custom expiration time
             
         Returns:
@@ -229,8 +254,8 @@ class JWTService:
         iat_time = datetime.now(timezone.utc)
         
         # Extract user fields
-        user_id = str(user_data.get('id', ''))
-        username = user_data.get('username', '')
+        user_id = str(_extract_user_field(user_data, 'id', ''))
+        username = _extract_user_field(user_data, 'username', '')
         
         to_encode = {
             "sub": user_id,
@@ -247,13 +272,13 @@ class JWTService:
     
     def create_token_pair(
         self,
-        user_data: Union[Dict[str, Any], UserData]
+        user_data: Union[Dict[str, Any], UserData, BaseEntity]
     ) -> TokenResponse:
         """
         Create both access and refresh tokens.
         
         Args:
-            user_data: Dictionary containing user information
+            user_data: Dictionary or BaseEntity containing user information
             
         Returns:
             TokenResponse: Dictionary with access_token, refresh_token, token_type, expires_in

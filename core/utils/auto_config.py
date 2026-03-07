@@ -36,12 +36,14 @@ class AutoConfigImpl(AutoConfig):
             expanded_value = Template(raw_value).safe_substitute(env_context)
 
             if (',type=' in expanded_value) or ('|type=' in expanded_value):
-                base_value, type_hint = expanded_value.split(',type=', 1)
+                base_value, type_hint = expanded_value.split(',type=', 1) if ',type=' in expanded_value else expanded_value.split('|type=', 1)
                 base_value = base_value.strip()
                 type_hint = type_hint.strip()
 
                 if type_hint == 'int':
                     parsed_value = int(base_value)
+                elif type_hint == 'float':
+                    parsed_value = float(base_value)
                 elif type_hint in ('list', 'dict'):
                     parsed_value = ast.literal_eval(base_value)
                 elif type_hint == 'bool':
