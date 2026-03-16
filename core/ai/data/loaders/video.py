@@ -248,8 +248,9 @@ class VideoLoader(BaseLoader):
             batch_fn = data_collator.get("batch_fn") if is_batch_mode else None
             batch_size = data_collator.get("batch_size", 16) if is_batch_mode else None
             single_fn = data_collator if callable(data_collator) else None
-
-            if frame_indices is None:
+            single_fn_for_batch = data_collator.get("single_fn_for_batch", False) if is_batch_mode else None
+            
+            if frame_indices is None:   
                 # Load all frames
                 while True:
                     ret, frame = cap.read()
@@ -271,7 +272,10 @@ class VideoLoader(BaseLoader):
                         ret, frame = cap.read()
                         if ret:
                             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                            pil_frames.append(Image.fromarray(frame_rgb))
+                            pil_frame = Image.fromarray(frame_rgb)
+                            if single_fn_for_batch:
+                                pil_frame = single_fn_for_batch(pil_frame)
+                            pil_frames.append(pil_frame)
                     
                     # Process accumulated frames in batches
                     for batch_start in range(0, len(pil_frames), batch_size):
