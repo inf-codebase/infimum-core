@@ -263,7 +263,7 @@ class VideoLoader(BaseLoader):
                     # random cap.set() seeks. A single seek to the first frame is made, then
                     # cap.grab() skips non-target frames (no pixel decode/alloc) and cap.read()
                     # is called only for target frames. ~3-5x faster on compressed video.
-                    frames = []
+                    raw_frames = []
                     sorted_indices = sorted(frame_indices)
                     if sorted_indices:
                         cap.set(cv2.CAP_PROP_POS_FRAMES, sorted_indices[0])
@@ -275,12 +275,13 @@ class VideoLoader(BaseLoader):
                             ret, frame = cap.read()
                             current_pos = target_idx + 1
                             if ret:
-                                frames.append(frame)
+                                raw_frames.append(frame)
+
                     
                     # Process accumulated frames in batches
-                    for batch_start in range(0, len(frames), batch_size):
-                        batch_end = min(batch_start + batch_size, len(frames))
-                        batch = frames[batch_start:batch_end]
+                    for batch_start in range(0, len(raw_frames), batch_size):
+                        batch_end = min(batch_start + batch_size, len(raw_frames))
+                        batch = raw_frames[batch_start:batch_end]
                         processed_batch = batch_fn(batch)  # Returns list of features
                         frames.extend(processed_batch)
                 else:
