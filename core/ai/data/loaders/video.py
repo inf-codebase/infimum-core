@@ -240,13 +240,13 @@ class VideoLoader(BaseLoader):
             frames = []
             frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-
+            
             # Determine processing mode
             is_batch_mode = isinstance(data_collator, dict) and "batch_fn" in data_collator
             batch_fn = data_collator.get("batch_fn") if is_batch_mode else None
             batch_size = data_collator.get("batch_size", 16) if is_batch_mode else None
             single_fn = data_collator if callable(data_collator) else None
-
+            
             if frame_indices is None:
                 # Load all frames
                 while True:
@@ -263,7 +263,7 @@ class VideoLoader(BaseLoader):
                     # random cap.set() seeks. A single seek to the first frame is made, then
                     # cap.grab() skips non-target frames (no pixel decode/alloc) and cap.read()
                     # is called only for target frames. ~3-5x faster on compressed video.
-                    raw_batch = []
+                    raw_frames = []
                     sorted_indices = sorted(frame_indices)
                     if sorted_indices:
                         cap.set(cv2.CAP_PROP_POS_FRAMES, sorted_indices[0])
@@ -274,19 +274,16 @@ class VideoLoader(BaseLoader):
                                 cap.grab()
                             ret, frame = cap.read()
                             current_pos = target_idx + 1
-                            if not ret:
-                                continue
-                            raw_batch.append(frame)
-                            # When we reach batch_size, process and clear
-                            if len(raw_batch) == batch_size:
-                                processed_batch = batch_fn(raw_batch)
-                                frames.extend(processed_batch)
-                                raw_batch.clear()
-                        # Process any remaining frames smaller than batch_size
-                        if raw_batch:
-                            processed_batch = batch_fn(raw_batch)
-                            frames.extend(processed_batch)
-                            raw_batch.clear()
+                            if ret:
+                                raw_frames.append(frame)
+
+                    
+                    # Process accumulated frames in batches
+                    for batch_start in range(0, len(raw_frames), batch_size):
+                        batch_end = min(batch_start + batch_size, len(raw_frames))
+                        batch = raw_frames[batch_start:batch_end]
+                        processed_batch = batch_fn(batch)  # Returns list of features
+                        frames.extend(processed_batch)
                 else:
                     # Single-frame mode (backward compatible) — same grab() optimisation
                     sorted_indices_single = sorted(frame_indices)
@@ -302,7 +299,7 @@ class VideoLoader(BaseLoader):
                             if ret:
                                 if single_fn:
                                     frame = single_fn(frame)
-                                frames.append(frame)
+                                frames.append(frame) 
             cap.release()
             return DataItem(data=frames, data_type="video", source=str(path), metadata={"frame_count": frame_count, "loaded_frames": len(frames), "fps": fps})
         else:
