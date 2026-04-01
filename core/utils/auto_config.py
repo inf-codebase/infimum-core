@@ -47,7 +47,7 @@ class AutoConfigImpl(AutoConfig):
                 elif type_hint in ('list', 'dict'):
                     parsed_value = ast.literal_eval(base_value)
                 elif type_hint == 'bool':
-                    parsed_value = base_value == 'True'
+                    parsed = (base == "True") or (base == "true") or (base == "1")
                 else:
                     parsed_value = base_value
             else:
