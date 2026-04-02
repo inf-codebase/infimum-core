@@ -21,6 +21,7 @@ import json
 import logging
 import os
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -134,6 +135,22 @@ class XCLIPProvider(BaseProvider):
         self._text_features: Optional[torch.Tensor] = None
         self._labels: List[str] = []
         self._action_group: List[str] = []
+        # Parallel CPU preprocessing (same pattern as EventDetector)
+        n_workers = max(2, (os.cpu_count() or 4) - 1)
+        self._preprocess_executor = ThreadPoolExecutor(max_workers=n_workers)
+        logger.debug(f"[XCLIPProvider] Preprocess workers: {n_workers}")
+
+    def __getstate__(self) -> Dict:
+        """Exclude ThreadPoolExecutor when pickling (ProcessPoolExecutor)."""
+        state = self.__dict__.copy()
+        state.pop("_preprocess_executor", None)
+        return state
+
+    def __setstate__(self, state: Dict) -> None:
+        """Recreate ThreadPoolExecutor after unpickling."""
+        self.__dict__.update(state)
+        n_workers = max(2, (os.cpu_count() or 4) - 1)
+        self._preprocess_executor = ThreadPoolExecutor(max_workers=n_workers)
 
     # ------------------------------------------------------------------
     # BaseProvider contract
@@ -190,6 +207,8 @@ class XCLIPProvider(BaseProvider):
         self._model = None
         self._processor = None
         self._text_features = None
+        if hasattr(self, "_preprocess_executor"):
+            self._preprocess_executor.shutdown(wait=False)
 
     # ------------------------------------------------------------------
     # Public inference API
@@ -288,6 +307,19 @@ class XCLIPProvider(BaseProvider):
         t = (t - mean) / std
         return t  # (F, 3, 224, 224) — still on CPU
 
+    def _preprocess_chunks_parallel(
+        self, chunks: List[List[np.ndarray]]
+    ) -> List[torch.Tensor]:
+        """
+        Preprocess a list of frame-chunks in parallel using ThreadPoolExecutor.
+
+        Each chunk is a list of ``num_frames`` RGB uint8 ndarrays.
+        Returns a list of tensors, one per chunk, each shape (F, 3, 224, 224).
+        """
+        return list(
+            self._preprocess_executor.map(self._preprocess_frame_chunk, chunks)
+        )
+
     def _infer_batch(
         self, stacked: torch.Tensor
     ) -> np.ndarray:
@@ -377,7 +409,7 @@ class XCLIPProvider(BaseProvider):
     def _run_video_inference(
         self, video_path: str
     ) -> Tuple[List[Dict[str, Any]], float]:
-        """Sliding-window frame sampling + batched X-CLIP inference."""
+        """Sliding-window frame sampling + parallel-preprocess + batched X-CLIP inference."""
         num_frames = self._read_config("num_frames", self.DEFAULT_NUM_FRAMES)
         sample_interval = self._read_config(
             "sample_interval", self.DEFAULT_SAMPLE_INTERVAL
@@ -401,7 +433,8 @@ class XCLIPProvider(BaseProvider):
 
         raw_detections: List[Dict] = []
         frame_buffer: deque = deque(maxlen=num_frames)
-        batch_tensors: List[torch.Tensor] = []
+        # Accumulate raw frame lists (not yet preprocessed)
+        pending_chunks: List[List[np.ndarray]] = []
         batch_meta: List[Dict] = []
         frame_count = 0
 
@@ -417,29 +450,31 @@ class XCLIPProvider(BaseProvider):
 
             # Emit a chunk every `sample_interval` frames once the buffer is full
             if len(frame_buffer) == num_frames and frame_count % sample_interval == 0:
-                chunk_tensor = self._preprocess_frame_chunk(list(frame_buffer))
-                batch_tensors.append(chunk_tensor)
+                # Store raw frames — preprocessing will be done in parallel below
+                pending_chunks.append(list(frame_buffer))
                 batch_meta.append(
                     {"frame_id": frame_count, "timestamp": frame_count / fps}
                 )
 
-                # Flush when batch is full
-                if len(batch_tensors) == batch_size:
-                    stacked = torch.stack(batch_tensors).to(self.device)  # (B,F,3,224,224)
+                # When we have a full batch: preprocess in parallel, then GPU forward
+                if len(pending_chunks) == batch_size:
+                    tensors = self._preprocess_chunks_parallel(pending_chunks)
+                    stacked = torch.stack(tensors).to(self.device)  # (B,F,3,224,224)
                     probs = self._infer_batch(stacked)
                     self._process_batch_predictions(
                         probs, batch_meta, raw_detections,
                         confidence_threshold, action_boost,
                     )
-                    batch_tensors.clear()
+                    pending_chunks.clear()
                     batch_meta.clear()
 
             frame_count += 1
             pbar.update(1)
 
         # Flush remaining chunks
-        if batch_tensors:
-            stacked = torch.stack(batch_tensors).to(self.device)
+        if pending_chunks:
+            tensors = self._preprocess_chunks_parallel(pending_chunks)
+            stacked = torch.stack(tensors).to(self.device)
             probs = self._infer_batch(stacked)
             self._process_batch_predictions(
                 probs, batch_meta, raw_detections,
