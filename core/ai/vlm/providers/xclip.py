@@ -34,6 +34,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import XCLIPModel, XCLIPProcessor
+from core.utils import auto_config
 
 from ...base.providers import BaseProvider, ModelConfig, ModelHandle
 from ...base.providers import ProviderRegistry, ProviderMetadata
@@ -70,7 +71,7 @@ class XCLIPProvider(BaseProvider):
     DEFAULT_MAX_FRAME_GAP = int(auto_config.DEFAULT_MAX_FRAME_GAP) if auto_config.DEFAULT_MAX_FRAME_GAP else 5
     DEFAULT_MIN_EVENT_FRAMES = int(auto_config.DEFAULT_MIN_EVENT_FRAMES) if auto_config.DEFAULT_MIN_EVENT_FRAMES else 2
     DEFAULT_ACTION_CONFIDENCE_BOOST = float(auto_config.DEFAULT_ACTION_CONFIDENCE_BOOST) if auto_config.DEFAULT_ACTION_CONFIDENCE_BOOST else 1.0
-    
+
     def __init__(self, config: Optional[ModelConfig] = None) -> None:
         super().__init__(config)
         self.device: str = "cuda" if torch.cuda.is_available() else "cpu"
@@ -79,7 +80,7 @@ class XCLIPProvider(BaseProvider):
         self._text_features: Optional[torch.Tensor] = None
         self._labels: List[str] = []
         self._action_group: List[str] = []
-        
+
         # Parallel CPU preprocessing
         n_workers = max(2, (os.cpu_count() or 4) - 1)
         self._preprocess_executor = ThreadPoolExecutor(max_workers=n_workers)
@@ -481,7 +482,7 @@ def _xclip_collate_fn(batch: List[Optional[Dict]]) -> Optional[Tuple[torch.Tenso
 @dataclass
 class XCLIPTrainConfig:
     # Bắt buộc client cấu hình các params này
-    json_file: str = ""  
+    json_file: str = ""
     video_dir: str = ""
     save_dir: str = "xclip_finetuned_model"
     num_frames: int = 8
