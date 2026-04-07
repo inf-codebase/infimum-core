@@ -35,6 +35,10 @@ class AutoConfigImpl(AutoConfig):
             raw_value = str(value).strip()
             expanded_value = Template(raw_value).safe_substitute(env_context)
 
+            # if value has comment: It has `#` and space after it, we remove them first.
+            if "#" in expanded_value and " " in expanded_value.split("#")[1]:
+                expanded_value = expanded_value.split("#")[0]
+
             if (',type=' in expanded_value) or ('|type=' in expanded_value):
                 base_value, type_hint = expanded_value.split(',type=', 1) if ',type=' in expanded_value else expanded_value.split('|type=', 1)
                 base_value = base_value.strip()
