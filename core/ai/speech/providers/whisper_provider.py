@@ -9,6 +9,7 @@ Acts as a generic loader that supports:
 
 import json
 import logging
+import os
 from typing import Optional, Dict, Any, Union
 from ...base.providers import (
     BaseProvider,
@@ -44,7 +45,7 @@ class WhisperProvider(BaseProvider):
         self._model = None
     
     def _validate_config(self, config: ModelConfig) -> None:
-        api_provider = config.extra_params.get("api_provider")
+        api_provider = config.extra_params.get("api_provider") or os.getenv("AI_PROVIDER")
         if api_provider:
             # If using API, we defer validation of model_name as any string can be passed to API
             return
@@ -64,29 +65,31 @@ class WhisperProvider(BaseProvider):
                 )
     
     def load_model(self, config: ModelConfig) -> ModelHandle:
-        api_provider = config.extra_params.get("api_provider")
+        api_provider = config.extra_params.get("api_provider") or os.getenv("AI_PROVIDER")
         
         if api_provider:
             # Setup API Clients
             api_key = config.extra_params.get("api_key")
-            base_url = config.extra_params.get("base_url")
+            base_url = config.extra_params.get("base_url") or os.getenv("OPENAI_BASE_URL")
             model_name = config.model_name or config.extra_params.get("model", "whisper-1")
             
             client = None
             if api_provider == "google":
                 from google import genai
+                api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
                 if not api_key:
-                    raise ValueError("API key is required for Google provider")
+                    raise ValueError("API key is required for Google provider (GEMINI_API_KEY)")
                 client = genai.Client(api_key=api_key)
             elif api_provider in ("openai", "local"):
                 from openai import OpenAI
+                api_key = api_key or os.getenv("OPENAI_API_KEY")
                 client_kwargs = {}
                 if api_key:
                     client_kwargs["api_key"] = api_key
                 else:
                     client_kwargs["api_key"] = "dummy-key-for-local"
                     
-                if api_provider == "local" and base_url:
+                if (api_provider == "local" or not api_key) and base_url:
                     client_kwargs["base_url"] = base_url
                 client = OpenAI(**client_kwargs)
             else:
@@ -156,7 +159,13 @@ class WhisperProvider(BaseProvider):
             
             logger.info(f"Uploading {audio_path} to Gemini...")
             audio_file = client.files.upload(file=str(audio_path))
-            prompt = kwargs.get("prompt", "Transcribe the following audio exactly.")
+            
+            default_prompt = (
+                "Transcribe the following audio exactly. "
+                "Return the result in JSON format with 'text' and 'segments' fields. "
+                "Each segment should contain 'start', 'end', and 'text'."
+            )
+            prompt = kwargs.get("prompt", default_prompt)
             
             response = client.models.generate_content(
                 model=model_name,
