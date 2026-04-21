@@ -95,6 +95,14 @@ def get_random_config(config_values):
     else:
         return config_values
 
+def _config_items():
+    """Yield (key, value) pairs from the module attributes (key=value style)."""
+    for k, v in vars(_this_module).items():
+        # Skip private attributes and callables
+        if k.startswith("_") or callable(v):
+            continue
+        yield k, v
+
 def get_config_by_prefix(prefix: str):
     return {k: v for k, v in config.config.repository.data.items() if k.startswith(prefix)}
 
@@ -142,3 +150,4 @@ def _detect_gpu_config():
 
 # Initialize GPU configuration at module load time
 GPU_CUDA_AVAILABLE, GPU_CUDA_COUNT, GPU_CUDA_VERSION, GPU_MPS_AVAILABLE = _detect_gpu_config()
+_this_module = sys.modules[__name__]
